@@ -1,24 +1,17 @@
 # Dockerfile for React Frontend
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
+RUN npm install
 
-# Install dependencies as root first
-RUN npm ci
+# Add this line to fix execute permissions
+RUN chmod +x -R ./node_modules/.bin
 
 # Copy source code
 COPY . .
-
-# Fix permissions for node_modules and all files
-RUN chown -R node:node /app && \
-    chmod -R 755 /app/node_modules
-
-# Switch to node user
-USER node
 
 # Expose port 3001
 EXPOSE 3001
