@@ -79,7 +79,7 @@ const Tools = () => {
       category: "Web Development",
       status: "Completed",
       technologies: ["Next.js", "AWS", "Docker"],
-      githubLink: "github.com/pradhyuman-yadav/shadowveil",
+      githubLink: "https://github.com/pradhyuman-yadav/shadowveil",
       liveLink: "",
       startDate: "Oct 2024"
     },
@@ -102,7 +102,7 @@ const Tools = () => {
       category: "Machine Learning",
       status: "Completed",
       technologies: ["Python", "Backtrader", "Machine Learning Libraries"],
-      githubLink: "github.com/pradhyuman-yadav/trading-script",
+      githubLink: "https://github.com/pradhyuman-yadav/trading-script",
       liveLink: "",
       startDate: "Dec 2024",
       endDate: "Jan 2025"

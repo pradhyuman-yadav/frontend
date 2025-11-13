@@ -419,6 +419,24 @@ const convertAssetToUrl = (assetData) => {
 };
 
 /**
+ * Normalize URL by adding protocol if missing
+ * @param {string} url - The URL to normalize
+ * @returns {string} The normalized URL with protocol
+ */
+const normalizeUrl = (url) => {
+  if (!url || url === '#') return url;
+  if (typeof url !== 'string') return '#';
+
+  // If it already has a protocol, return as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+
+  // Add https:// protocol if missing
+  return `https://${url}`;
+};
+
+/**
  * Transform Squidex about data to component-friendly format
  * @param {Object} squidexData - Raw Squidex about item
  * @returns {Object} Transformed about data
@@ -543,8 +561,8 @@ export const transformProjects = (items) => {
         fullDescription: item.data?.fullDescription?.iv || '',
         thumbnail: convertAssetToUrl(item.data?.thumbnail?.iv),
         images: (item.data?.images?.iv || []).map(convertAssetToUrl).filter(Boolean),
-        projectUrl: item.data?.projectUrl?.iv || '#',
-        githubUrl: item.data?.githubUrl?.iv || '#',
+        projectUrl: normalizeUrl(item.data?.projectUrl?.iv) || '#',
+        githubUrl: normalizeUrl(item.data?.githubUrl?.iv) || '#',
         technologies: item.data?.technologies?.iv || [],
         highlights: item.data?.highlights?.iv || [],
         startDate: formatDate(item.data?.startDate?.iv),

@@ -1056,14 +1056,21 @@ body {
 }
 
 .tool-category-badge {
-  padding: 0.2rem 0.6rem;
+  padding: 0.3rem 0.8rem;
   border-radius: 3px;
   font-size: 0.7rem;
   font-weight: 500;
   color: var(--text-color);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  background-color: var(--nav-hover);
   border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .tool-category-badge {
+  background-color: #F5F5DC;
+  color: #000000;
+  border-color: #F5F5DC;
 }
 
 .tool-category {
@@ -4724,9 +4731,9 @@ body {
 /* Single Article Page */
 
 .single-article-page {
-  padding: 2rem;
-  max-width: 900px;
-  margin: 0 auto;
+  padding: 0;
+  max-width: none;
+  margin: 0;
 }
 
 .article-display {
@@ -4796,11 +4803,12 @@ body {
 
 .article-reading-time,
 .article-word-count {
-  background: var(--border-color);
-  color: var(--page-bg);
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  background: transparent;
+  color: var(--text-color);
+  padding: 0.5rem 0;
+  border-radius: 0;
   font-weight: 500;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .article-excerpt {
