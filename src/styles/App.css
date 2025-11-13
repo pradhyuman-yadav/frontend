@@ -2737,6 +2737,40 @@ body {
   font-weight: bold;
 }
 
+/* Achievements section for work experience */
+.achievements-section {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 0;
+  color: var(--text-color);
+}
+
+.achievements-section strong {
+  display: block;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.8rem;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.achievements-list {
+  margin: 0.5rem 0 0 1.5rem;
+  padding: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-color);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  list-style-type: disc;
+}
+
+.achievements-list li {
+  margin-bottom: 0.4rem;
+  color: var(--text-color);
+}
+
 .education-list {
   display: flex;
   flex-direction: column;
@@ -2978,42 +3012,32 @@ body {
 
 /* Coursework section */
 .coursework {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background-color: var(--nav-hover);
-  border-left: 3px solid var(--text-color);
-  border-radius: 0 4px 4px 0;
+  margin-top: 0.4rem;
+  margin-bottom: 0.6rem;
+  padding: 0;
+  color: var(--text-color);
+  font-size: 0.8rem;
+  opacity: 0.8;
 }
 
 .coursework strong {
-  display: block;
-  margin-bottom: 0.8rem;
+  display: inline;
+  margin-right: 0.3rem;
   font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.coursework ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  columns: 2;
-  column-gap: 2rem;
-}
-
-.coursework li {
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-  break-inside: avoid;
-  padding-left: 1rem;
-  position: relative;
-}
-
-.coursework li::before {
-  content: "▪";
-  position: absolute;
-  left: 0;
   color: var(--text-color);
+  font-weight: 400;
+}
+
+.coursework .coursework-list {
+  margin: 0;
+  padding: 0;
+  font-size: 0.9rem !important;
+  line-height: 0.9rem;
+  color: var(--text-color);
+  font-weight: 400;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: inline;
 }
 
 /* Achievements and highlights lists */

@@ -463,18 +463,32 @@ export const transformEducation = (items) => {
 
   return items
     .sort((a, b) => (a.data?.displayOrder?.iv || 0) - (b.data?.displayOrder?.iv || 0))
-    .map(item => ({
-      degree: item.data?.degree?.iv || '',
-      fieldOfStudy: item.data?.fieldOfStudy?.iv || '',
-      institution: item.data?.institution?.iv || '',
-      institutionLogo: convertAssetToUrl(item.data?.institutionLogo?.iv),
-      location: item.data?.location?.iv || '',
-      startDate: formatDate(item.data?.startDate?.iv),
-      endDate: formatDate(item.data?.endDate?.iv),
-      gpa: item.data?.gpa?.iv || '',
-      achievements: item.data?.achievements?.iv || [],
-      relevantCoursework: item.data?.relevantCoursework?.iv || []
-    }));
+    .map(item => {
+      // Extract achievements - they are objects with 'achievement' property
+      const achievementsArray = item.data?.achievements?.iv || [];
+      const achievements = Array.isArray(achievementsArray)
+        ? achievementsArray.map(a => a.achievement || a)
+        : [];
+
+      // Extract coursework - they are objects with 'course' property
+      const courseworkArray = item.data?.relevantCoursework?.iv || [];
+      const relevantCoursework = Array.isArray(courseworkArray)
+        ? courseworkArray.map(c => c.course || c)
+        : [];
+
+      return {
+        degree: item.data?.degree?.iv || '',
+        fieldOfStudy: item.data?.fieldOfStudy?.iv || '',
+        institution: item.data?.institution?.iv || '',
+        institutionLogo: convertAssetToUrl(item.data?.institutionLogo?.iv),
+        location: item.data?.location?.iv || '',
+        startDate: formatDate(item.data?.startDate?.iv),
+        endDate: formatDate(item.data?.endDate?.iv),
+        gpa: item.data?.gpa?.iv || '',
+        achievements: achievements,
+        relevantCoursework: relevantCoursework
+      };
+    });
 };
 
 /**
@@ -489,6 +503,13 @@ export const transformWorkExperience = (items) => {
     .sort((a, b) => (a.data?.displayOrder?.iv || 0) - (b.data?.displayOrder?.iv || 0))
     .map(item => {
       const endDate = item.data?.isCurrent?.iv ? 'Present' : item.data?.endDate?.iv;
+
+      // Extract achievements - they are objects with 'achievement' property
+      const achievementsArray = item.data?.achievements?.iv || [];
+      const achievements = Array.isArray(achievementsArray)
+        ? achievementsArray.map(a => a.achievement || a)
+        : [];
+
       return {
         role: item.data?.role?.iv || '',
         company: item.data?.company?.iv || '',
@@ -497,7 +518,7 @@ export const transformWorkExperience = (items) => {
         period: formatDateRange(item.data?.startDate?.iv, endDate),
         location: item.data?.location?.iv || '',
         description: item.data?.description?.iv || '',
-        achievements: item.data?.achievements?.iv || [],
+        achievements: achievements,
         technologies: item.data?.technologies?.iv || [],
         isCurrent: item.data?.isCurrent?.iv || false
       };

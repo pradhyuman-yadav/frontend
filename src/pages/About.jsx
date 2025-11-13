@@ -96,21 +96,17 @@ const About = () => {
                 </div>
                 {edu.relevantCoursework && edu.relevantCoursework.length > 0 && (
                   <div className="coursework">
-                    <strong>📚 Relevant Coursework:</strong>
-                    <ul>
-                      {edu.relevantCoursework.map((course, idx) => {
-                        const courseName = typeof course === 'string' ? course : course.name || '';
-                        return courseName ? <li key={idx}>{courseName}</li> : null;
-                      })}
-                    </ul>
+                    <strong>Relevant Coursework:</strong>
+                    <p className="coursework-list">
+                      {edu.relevantCoursework.filter(Boolean).join(', ')}
+                    </p>
                   </div>
                 )}
                 {edu.achievements && edu.achievements.length > 0 && (
                   <ul className="achievements">
-                    {edu.achievements.map((achievement, idx) => {
-                      const text = typeof achievement === 'string' ? achievement : achievement.description || '';
-                      return text ? <li key={idx}>✓ {text}</li> : null;
-                    })}
+                    {edu.achievements.filter(Boolean).map((achievement, idx) => (
+                      <li key={idx}>✓ {achievement}</li>
+                    ))}
                   </ul>
                 )}
               </div>
@@ -142,6 +138,16 @@ const About = () => {
                   </div>
                 </div>
                 {job.description && <p className="job-description">{job.description}</p>}
+                {job.achievements && job.achievements.length > 0 && (
+                  <div className="achievements-section">
+                    <strong>Key Achievements:</strong>
+                    <ul className="achievements-list">
+                      {job.achievements.filter(Boolean).map((achievement, idx) => (
+                        <li key={idx}>{achievement}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 {job.technologies && job.technologies.length > 0 && (
                   <div className="technologies">
                     <strong>Technologies:</strong>
@@ -151,14 +157,6 @@ const About = () => {
                       ))}
                     </div>
                   </div>
-                )}
-                {job.achievements && job.achievements.length > 0 && (
-                  <ul className="job-achievements">
-                    {job.achievements.map((achievement, achIndex) => {
-                      const text = typeof achievement === 'string' ? achievement : achievement.description || '';
-                      return text ? <li key={achIndex}>✓ {text}</li> : null;
-                    })}
-                  </ul>
                 )}
               </div>
             ))}
@@ -194,10 +192,9 @@ const About = () => {
                 )}
                 {project.highlights && project.highlights.length > 0 && (
                   <ul className="project-highlights">
-                    {project.highlights.map((highlight, hIdx) => {
-                      const text = typeof highlight === 'string' ? highlight : highlight.description || '';
-                      return text ? <li key={hIdx}>✓ {text}</li> : null;
-                    })}
+                    {project.highlights.filter(Boolean).map((highlight, hIdx) => (
+                      <li key={hIdx}>✓ {highlight}</li>
+                    ))}
                   </ul>
                 )}
                 {project.technologies && project.technologies.length > 0 && (
