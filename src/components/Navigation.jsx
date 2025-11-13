@@ -22,7 +22,7 @@ const Navigation = () => {
       <div className="nav-divider"></div>
 
       <a href="https://home.thepk.in" className="nav-external-link" target="_blank" rel="noopener noreferrer">
-        Homepage
+        Dashboard
       </a>
       <a href="https://portainer.thepk.in" className="nav-external-link" target="_blank" rel="noopener noreferrer">
         Portainer
