@@ -19,6 +19,7 @@ import RegexBuilder from './pages/tools/RegexBuilder';
 import Base64Converter from './pages/tools/Base64Converter';
 import PortraitProcessor from './pages/tools/PortraitProcessor';
 import LLMChat from './pages/LLMChat';
+import Pipeline from './pages/Pipeline';
 import './styles/App.css';
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
             <Route path="/tools/base64-converter" element={<Base64Converter />} />
             <Route path="/tools/portrait-processor" element={<PortraitProcessor />} />
             <Route path="/llm-chat" element={<LLMChat />} />
+            <Route path="/pipeline" element={<Pipeline />} />
           </Routes>
         </Layout>
       </Router>

@@ -20,6 +20,9 @@ const Navigation = () => {
       <Link to="/llm-chat" className={location.pathname === '/llm-chat' ? 'active' : ''}>
         AI Chat (SLM)
       </Link>
+      <Link to="/pipeline" className={location.pathname === '/pipeline' ? 'active' : ''}>
+        Pipeline
+      </Link>
 
       {/* External Services */}
       <div className="nav-divider"></div>
