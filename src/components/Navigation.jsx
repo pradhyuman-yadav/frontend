@@ -17,6 +17,9 @@ const Navigation = () => {
       <Link to="/about" className={location.pathname === '/about' ? 'active' : ''}>
         About Me
       </Link>
+      <Link to="/llm-chat" className={location.pathname === '/llm-chat' ? 'active' : ''}>
+        AI Chat (SLM)
+      </Link>
 
       {/* External Services */}
       <div className="nav-divider"></div>
