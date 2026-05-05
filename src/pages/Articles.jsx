@@ -8,40 +8,30 @@ const Articles = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handleArticleClick = (articleId) => {
-    navigate(`/article/${articleId}`);
-  };
-
   useEffect(() => {
-    const fetchAllArticles = async () => {
+    const fetchAll = async () => {
       try {
         setLoading(true);
         setError(null);
-        
-        // Import the fetch function from cmsService
         const { fetchSquidexArticles } = await import('../services/cmsService');
         const articles = await fetchSquidexArticles();
-
-        // Process articles using shared utility
-        const processedArticles = articles.map(article => processArticleData(article));
-
-        setAllArticles(processedArticles);
+        setAllArticles(articles.map(a => processArticleData(a)));
       } catch (err) {
-        console.error('Error fetching articles:', err);
-        setError(`Failed to load articles: ${err.message}`);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchAllArticles();
+    fetchAll();
   }, []);
 
   if (loading) {
     return (
       <div className="articles-page">
-        <h2>All Articles</h2>
-        <p>Loading articles...</p>
+        <header className="page-header">
+          <h1 className="page-title">Articles</h1>
+        </header>
+        <p className="state-msg">Loading articles…</p>
       </div>
     );
   }
@@ -49,63 +39,48 @@ const Articles = () => {
   if (error) {
     return (
       <div className="articles-page">
-        <h2>All Articles</h2>
-        <p>Error: {error}</p>
+        <header className="page-header">
+          <h1 className="page-title">Articles</h1>
+        </header>
+        <p className="state-msg">Error: {error}</p>
       </div>
     );
   }
 
   return (
     <div className="articles-page">
-      <h2>All Articles</h2>
-      <p>Found {allArticles.length} article{allArticles.length !== 1 ? 's' : ''}</p>
-      
+      <header className="page-header">
+        <h1 className="page-title">Articles</h1>
+        <p className="page-subtitle">{allArticles.length} article{allArticles.length !== 1 ? 's' : ''}</p>
+      </header>
+
       <div className="articles-list">
         {allArticles.map((article) => (
-          <article
+          <div
             key={article.id}
-            className="article-summary"
-            onClick={() => handleArticleClick(article.id)}
+            className="article-card"
+            onClick={() => navigate(`/article/${article.id}`)}
+            style={{ cursor: 'pointer' }}
           >
-            {article.featuredImage && (
-              <div className="article-summary-image">
-                <img src={article.featuredImage} alt={article.title} />
+            <h3 className="article-card-title">{article.title}</h3>
+            <div className="article-card-meta">
+              {article.author && <span>By {article.author}</span>}
+              {article.publishDate && (
+                <time>{new Date(article.publishDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+              )}
+              {article.readingTime && <span>{article.readingTime} min read</span>}
+            </div>
+            {article.excerpt && (
+              <p className="article-card-excerpt">{article.excerpt}</p>
+            )}
+            {article.tags && article.tags.length > 0 && (
+              <div className="article-card-tags">
+                {article.tags.map((tag, i) => (
+                  <span key={i} className="art-tag">{tag}</span>
+                ))}
               </div>
             )}
-
-            <div className="article-summary-body">
-              <header className="article-summary-header">
-                <h3 className="article-summary-title">{article.title}</h3>
-                <div className="article-summary-meta">
-                  <span className="article-summary-author">By {article.author}</span>
-                  <time className="article-summary-date">
-                    {new Date(article.publishDate).toLocaleDateString()}
-                  </time>
-                  {article.readingTime && (
-                    <span className="article-summary-reading-time">
-                      {article.readingTime} min read
-                    </span>
-                  )}
-                </div>
-              </header>
-
-              {article.excerpt && (
-                <p className="article-summary-excerpt">{article.excerpt}</p>
-              )}
-
-              <div className="article-summary-content">
-                <div dangerouslySetInnerHTML={{ __html: article.content.substring(0, 300) + '...' }} />
-              </div>
-
-              {article.tags && article.tags.length > 0 && (
-                <div className="article-summary-tags">
-                  {article.tags.map((tag, index) => (
-                    <span key={index} className="tag">{tag}</span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </article>
+          </div>
         ))}
       </div>
     </div>

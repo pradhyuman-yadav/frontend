@@ -1,0 +1,9 @@
+services:
+  frontend:
+    build:
+      context: .
+    container_name: react-app
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    pull_policy: build

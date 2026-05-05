@@ -5,7 +5,6 @@ import ErrorMessage from '../components/ErrorMessage';
 const About = () => {
   const { data, loading, error } = useAboutPage();
 
-  // Show loading spinner while fetching data
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -14,99 +13,79 @@ const About = () => {
 
   return (
     <div className="about-page">
-      {/* Display error message if there was an error, but still show content */}
       {error && <ErrorMessage message={error} />}
 
       <header className="page-header">
-        <div className="profile-intro">
-          {about.profileImage && (
-            <img src={about.profileImage} alt={about.name} className="profile-image" />
+        <div className="profile-row">
+          {about.profileImage ? (
+            <img src={about.profileImage} alt={about.name} className="profile-img" />
+          ) : (
+            <div className="initials-avatar">PY</div>
           )}
-          <div className="profile-content">
-            {/* <h1 className="page-title">{about.name}</h1> */}
+          <div className="profile-info">
             {about.currentRole && <h3 className="current-role">{about.currentRole}</h3>}
-
-            <div className="contact-header">
-              {about.location && <p className="location">📍 {about.location}</p>}
+            <div className="profile-contacts">
+              {about.location && <span className="profile-contact">{about.location}</span>}
               {about.phone && (
-                <a href={`tel:${about.phone}`} className="contact-link">
-                  ☎ {about.phone}
+                <a href={`tel:${about.phone}`} className="profile-contact">
+                  {about.phone}
                 </a>
               )}
               {about.email && (
-                <a href={`mailto:${about.email}`} className="contact-link">
-                  ✉ {about.email}
+                <a href={`mailto:${about.email}`} className="profile-contact">
+                  {about.email}
                 </a>
               )}
               {about.resumeFile && (
-                <a href={about.resumeFile} className="contact-link" target="_blank" rel="noopener noreferrer">
-                  📥 Resume
+                <a href={about.resumeFile} className="profile-contact" target="_blank" rel="noopener noreferrer">
+                  Resume
                 </a>
               )}
-              {about.socialLinks && about.socialLinks.length > 0 && (
-                <div className="social-links">
-                  {about.socialLinks.map((link, idx) => (
-                    <a key={idx} href={link.url} className="social-link" target="_blank" rel="noopener noreferrer">
-                      {link.label}
-                    </a>
-                  ))}
-                </div>
-              )}
+              {about.socialLinks && about.socialLinks.length > 0 && about.socialLinks.map((link, idx) => (
+                <a key={idx} href={link.url} className="profile-contact" target="_blank" rel="noopener noreferrer">
+                  {link.platform || link.label}
+                </a>
+              ))}
             </div>
           </div>
         </div>
 
-        {about.tagline && <p className="tagline">{about.tagline}</p>}
+        {about.tagline && (
+          <p className="tagline-rule">{about.tagline}</p>
+        )}
       </header>
 
       {about.bio && (
         <section className="about-section">
-          <h2 className="section-title">About</h2>
-          <div className="summary-content">
-            <p>{about.bio}</p>
-          </div>
+          <h2 className="section-header">About</h2>
+          <p className="bio-text">{about.bio}</p>
         </section>
       )}
 
       {education && education.length > 0 && (
         <section className="about-section">
-          <h2 className="section-title">Education</h2>
+          <h2 className="section-header">Education</h2>
           <div className="education-list">
             {education.map((edu, index) => (
-              <div key={index} className="education-item">
-                <div className="education-header">
-                  {edu.institutionLogo && (
-                    <img src={edu.institutionLogo} alt={edu.institution} className="institution-logo" />
-                  )}
-                  <div className="education-content">
-                    <h3 className="degree">
-                      {edu.degree} {edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}
-                    </h3>
-                    <div className="education-meta">
-                      <span className="institution">{edu.institution}</span>
-                      {edu.location && <span className="location">{edu.location}</span>}
-                    </div>
-                    <div className="education-details">
-                      {edu.gpa && <span className="gpa">GPA: {edu.gpa}</span>}
-                      {edu.startDate && edu.endDate && (
-                        <span className="dates">{edu.startDate} – {edu.endDate}</span>
-                      )}
-                    </div>
-                  </div>
+              <div key={index} className="edu-item">
+                <h3 className="edu-degree">
+                  {edu.degree}{edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}
+                </h3>
+                <div className="edu-school">
+                  {edu.institution}{edu.location ? ` — ${edu.location}` : ''}
                 </div>
+                {edu.startDate && edu.endDate && (
+                  <div className="edu-dates">{edu.startDate} – {edu.endDate}</div>
+                )}
+                {edu.gpa && <div className="edu-dates">GPA: {edu.gpa}</div>}
                 {edu.relevantCoursework && edu.relevantCoursework.length > 0 && (
-                  <div className="coursework">
-                    <strong>Relevant Coursework:</strong>
-                    <p className="coursework-list">
-                      {edu.relevantCoursework.filter(Boolean).join(', ')}
-                    </p>
+                  <div className="coursework" style={{ marginTop: '.5rem', fontSize: '.85rem' }}>
+                    <strong>Coursework:</strong> {edu.relevantCoursework.filter(Boolean).join(', ')}
                   </div>
                 )}
                 {edu.achievements && edu.achievements.length > 0 && (
-                  <ul className="achievements">
-                    {edu.achievements.filter(Boolean).map((achievement, idx) => (
-                      <li key={idx}>✓ {achievement}</li>
-                    ))}
+                  <ul className="achievements" style={{ marginTop: '.5rem', paddingLeft: '1.2rem', fontSize: '.85rem' }}>
+                    {edu.achievements.filter(Boolean).map((a, i) => <li key={i}>{a}</li>)}
                   </ul>
                 )}
               </div>
@@ -117,45 +96,29 @@ const About = () => {
 
       {experience && experience.length > 0 && (
         <section className="about-section">
-          <h2 className="section-title">Work Experience</h2>
+          <h2 className="section-header">Work Experience</h2>
           <div className="experience-timeline">
             {experience.map((job, index) => (
-              <div key={index} className="experience-item">
-                <div className="experience-header">
-                  {job.companyLogo && (
-                    <img src={job.companyLogo} alt={job.company} className="company-logo" />
-                  )}
-                  <div className="job-content">
-                    <div className="job-header-row">
-                      <h3 className="job-title">{job.role}</h3>
-                      {job.employmentType && <span className="employment-type">{job.employmentType}</span>}
-                    </div>
-                    <div className="job-meta">
-                      <span className="company">{job.company}</span>
-                      {job.location && <span className="location">{job.location}</span>}
-                    </div>
-                    <span className="period">{job.period}</span>
-                  </div>
+              <div key={index} className="exp-item">
+                <div className="exp-header">
+                  <h3 className="exp-role">{job.role}</h3>
+                  {job.period && <span className="exp-period">{job.period}</span>}
                 </div>
-                {job.description && <p className="job-description">{job.description}</p>}
+                <div className="exp-company">
+                  {job.company}{job.location ? ` — ${job.location}` : ''}
+                  {job.employmentType ? ` · ${job.employmentType}` : ''}
+                </div>
+                {job.description && <p className="exp-desc">{job.description}</p>}
                 {job.achievements && job.achievements.length > 0 && (
-                  <div className="achievements-section">
-                    <strong>Key Achievements:</strong>
-                    <ul className="achievements-list">
-                      {job.achievements.filter(Boolean).map((achievement, idx) => (
-                        <li key={idx}>{achievement}</li>
-                      ))}
-                    </ul>
-                  </div>
+                  <ul style={{ paddingLeft: '1.2rem', fontSize: '.85rem', marginTop: '.4rem' }}>
+                    {job.achievements.filter(Boolean).map((a, i) => <li key={i}>{a}</li>)}
+                  </ul>
                 )}
                 {job.technologies && job.technologies.length > 0 && (
-                  <div className="technologies">
-                    <strong>Technologies:</strong>
-                    <div className="tech-list">
-                      {job.technologies.map((tech, techIdx) => (
-                        <span key={techIdx} className="tech-badge">{tech}</span>
-                      ))}
-                    </div>
+                  <div className="exp-techs">
+                    {job.technologies.map((tech, i) => (
+                      <span key={i} className="exp-tech">{tech}</span>
+                    ))}
                   </div>
                 )}
               </div>
@@ -166,73 +129,39 @@ const About = () => {
 
       {projects && projects.length > 0 && (
         <section className="about-section">
-          <h2 className="section-title">Projects</h2>
+          <h2 className="section-header">Projects</h2>
           <div className="projects-list">
             {projects.map((project, index) => (
-              <div key={index} className="project-card">
-                {project.thumbnail && (
-                  <div className="project-thumbnail">
-                    <img src={project.thumbnail} alt={project.title} />
-                  </div>
-                )}
-                <div className="project-header">
-                  <h3 className="project-title">{project.title}</h3>
-                  {project.category && <span className="project-category">{project.category}</span>}
-                  <div className="project-meta">
-                    {project.startDate && project.endDate && (
-                      <span className="project-dates">{project.startDate} – {project.endDate}</span>
-                    )}
-                  </div>
+              <div key={index} className="project-row">
+                <div className="proj-header">
+                  <span className="proj-name">{project.title}</span>
+                  {project.category && <span className="badge-cat">{project.category}</span>}
+                  {project.startDate && project.endDate && (
+                    <span className="proj-period">{project.startDate} – {project.endDate}</span>
+                  )}
                 </div>
                 {project.shortDescription && (
-                  <p className="project-short-description">{project.shortDescription}</p>
+                  <p className="proj-desc">{project.shortDescription}</p>
                 )}
-                {project.fullDescription && (
-                  <p className="project-description">{project.fullDescription}</p>
-                )}
-                {project.highlights && project.highlights.length > 0 && (
-                  <ul className="project-highlights">
-                    {project.highlights.filter(Boolean).map((highlight, hIdx) => (
-                      <li key={hIdx}>✓ {highlight}</li>
-                    ))}
-                  </ul>
+                {project.fullDescription && !project.shortDescription && (
+                  <p className="proj-desc">{project.fullDescription}</p>
                 )}
                 {project.technologies && project.technologies.length > 0 && (
-                  <div className="project-technologies">
-                    <strong>Tech Stack:</strong>
-                    <div className="tech-tags">
-                      {project.technologies.map((tech, techIndex) => (
-                        <span key={techIndex} className="tech-tag">{tech}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {project.images && project.images.length > 0 && (
-                  <div className="project-gallery">
-                    {project.images.map((img, imgIndex) => (
-                      <img key={imgIndex} src={img} alt={`${project.title} ${imgIndex + 1}`} />
+                  <div className="exp-techs">
+                    {project.technologies.map((tech, i) => (
+                      <span key={i} className="exp-tech">{tech}</span>
                     ))}
                   </div>
                 )}
-                <div className="project-footer">
+                <div style={{ marginTop: '.6rem', display: 'flex', gap: '1rem' }}>
                   {project.projectUrl && project.projectUrl !== '#' && (
-                    <a
-                      href={project.projectUrl}
-                      className="project-link"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      View Live →
+                    <a href={project.projectUrl} className="profile-contact" target="_blank" rel="noopener noreferrer">
+                      Live →
                     </a>
                   )}
                   {project.githubUrl && project.githubUrl !== '#' && (
-                    <a
-                      href={project.githubUrl}
-                      className="project-link"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      View Code →
+                    <a href={project.githubUrl} className="profile-contact" target="_blank" rel="noopener noreferrer">
+                      Code →
                     </a>
                   )}
                 </div>
@@ -244,12 +173,12 @@ const About = () => {
 
       {skills && Object.keys(skills).length > 0 && (
         <section className="about-section">
-          <h2 className="section-title">Technical Skills</h2>
-          <div className="skills-grid">
+          <h2 className="section-header">Technical Skills</h2>
+          <div className="skills-newspaper-grid">
             {Object.entries(skills).map(([category, skillList]) => (
-              <div key={category} className="skill-category">
-                <h3 className="skill-category-title">{category}</h3>
-                <p className="skill-list-text">
+              <div key={category} className="skill-cat">
+                <h3 className="skill-cat-title">{category}</h3>
+                <p className="skill-cat-list">
                   {skillList.map((skill) => skill.name).join(', ')}
                 </p>
               </div>

@@ -20,6 +20,7 @@ import Base64Converter from './pages/tools/Base64Converter';
 import PortraitProcessor from './pages/tools/PortraitProcessor';
 import LLMChat from './pages/LLMChat';
 import Pipeline from './pages/Pipeline';
+import DCMetro from './pages/DCMetro';
 import './styles/App.css';
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
             <Route path="/tools/portrait-processor" element={<PortraitProcessor />} />
             <Route path="/llm-chat" element={<LLMChat />} />
             <Route path="/pipeline" element={<Pipeline />} />
+            <Route path="/dc-metro" element={<DCMetro />} />
           </Routes>
         </Layout>
       </Router>
