@@ -6,11 +6,18 @@ const SQUIDEX_CLIENT_ID = import.meta.env.VITE_SQUIDEX_CLIENT_ID || 'platform:pl
 const SQUIDEX_CLIENT_SECRET = import.meta.env.VITE_SQUIDEX_CLIENT_SECRET || '4tcz1yi7yusapvyyuqfiqjdodgkqxiiyoxafkcyapkgx';
 const SQUIDEX_URL = import.meta.env.VITE_SQUIDEX_URL || 'https://squidex.thepk.in';
 
-// Get access token from Squidex
+// In-memory token cache
+let _tokenCache = null;
+let _tokenExpiry = 0;
+
+// Get access token from Squidex (cached)
 const getSquidexToken = async () => {
+  const now = Date.now();
+  if (_tokenCache && now < _tokenExpiry) return _tokenCache;
+
   try {
     const tokenUrl = `${SQUIDEX_URL}/identity-server/connect/token`;
-    
+
     const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
@@ -30,7 +37,9 @@ const getSquidexToken = async () => {
     }
 
     const data = await response.json();
-    return data.access_token;
+    _tokenCache = data.access_token;
+    _tokenExpiry = now + (data.expires_in - 60) * 1000;
+    return _tokenCache;
   } catch (error) {
     console.error('Error getting Squidex token:', error);
     throw error;

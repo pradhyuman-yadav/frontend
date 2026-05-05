@@ -17,24 +17,16 @@ const SingleArticle = () => {
       try {
         setLoading(true);
         setError(null);
-
         const articles = await fetchSquidexArticles();
         if (cancelled) return;
-
-        const foundArticle = articles.find(art => art.id === id);
-
-        if (!foundArticle) {
-          throw new Error('Article not found');
-        }
-
-        const processedArticle = processArticleData(foundArticle);
+        const found = articles.find(a => a.id === id);
+        if (!found) throw new Error('Article not found');
+        const processed = processArticleData(found);
         if (cancelled) return;
-
-        setArticle(processedArticle);
+        setArticle(processed);
       } catch (err) {
         if (cancelled) return;
-        console.error('Error fetching article:', err);
-        setError(`Failed to load article: ${err.message}`);
+        setError(err.message);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -44,13 +36,17 @@ const SingleArticle = () => {
     return () => { cancelled = true; };
   }, [id]);
 
+  const BackBtn = () => (
+    <button className="back-btn" onClick={() => navigate('/articles')}>
+      ← Back to Articles
+    </button>
+  );
+
   if (loading) {
     return (
       <div className="single-article-page">
-        <button className="back-button" onClick={() => navigate('/articles')}>
-          ← Back to Articles
-        </button>
-        <p>Loading article...</p>
+        <BackBtn />
+        <p className="state-msg">Loading article…</p>
       </div>
     );
   }
@@ -58,10 +54,8 @@ const SingleArticle = () => {
   if (error) {
     return (
       <div className="single-article-page">
-        <button className="back-button" onClick={() => navigate('/articles')}>
-          ← Back to Articles
-        </button>
-        <p>Error: {error}</p>
+        <BackBtn />
+        <p className="state-msg">Error: {error}</p>
       </div>
     );
   }
@@ -69,22 +63,15 @@ const SingleArticle = () => {
   if (!article) {
     return (
       <div className="single-article-page">
-        <button className="back-button" onClick={() => navigate('/articles')}>
-          ← Back to Articles
-        </button>
-        <p>Article not found.</p>
+        <BackBtn />
+        <p className="state-msg">Article not found.</p>
       </div>
     );
   }
 
   return (
     <div className="single-article-page">
-      <button
-        className="back-button"
-        onClick={() => navigate('/articles')}
-      >
-        ← Back to Articles
-      </button>
+      <BackBtn />
 
       <article className="article-display">
         {article.featuredImage && (
@@ -93,55 +80,34 @@ const SingleArticle = () => {
           </figure>
         )}
 
-        <header className="article-header">
-          <h1 className="article-title">{article.title}</h1>
-
-          <div className="article-meta">
-            {article.author && (
-              <span className="article-author">By {article.author}</span>
-            )}
+        <header style={{ borderTop: 'var(--rule-thick) solid var(--ink)', paddingTop: '.75rem', marginBottom: '1.5rem' }}>
+          <h1 className="art-title">{article.title}</h1>
+          <div className="art-meta">
+            {article.author && <span>By {article.author}</span>}
             {article.publishDate && (
-              <time className="article-date" dateTime={new Date(article.publishDate).toISOString()}>
-                {new Date(article.publishDate).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
+              <time dateTime={new Date(article.publishDate).toISOString()}>
+                {new Date(article.publishDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </time>
             )}
-            {article.readingTime && (
-              <span className="article-reading-time">{article.readingTime} min read</span>
-            )}
-            {article.wordCount && (
-              <span className="article-word-count">{article.wordCount.toLocaleString()} words</span>
-            )}
+            {article.readingTime && <span>{article.readingTime} min read</span>}
           </div>
-
-          {article.excerpt && (
-            <p className="article-excerpt">{article.excerpt}</p>
-          )}
+          {article.excerpt && <p className="art-excerpt">{article.excerpt}</p>}
         </header>
 
-        <div className="article-content" dangerouslySetInnerHTML={{ __html: article.content }} />
+        <div className="art-body article-content" dangerouslySetInnerHTML={{ __html: article.content }} />
 
-        <footer className="article-footer">
+        <footer style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
           {article.tags && article.tags.length > 0 && (
-            <div className="article-tags">
-              <span className="tags-label">Tags:</span>
-              {article.tags.map((tag, index) => (
-                <span key={index} className="tag">{tag}</span>
+            <div className="article-card-tags">
+              {article.tags.map((tag, i) => (
+                <span key={i} className="art-tag">{tag}</span>
               ))}
             </div>
           )}
-
           {article.lastModified && (
-            <div className="article-last-updated">
-              Last updated: {new Date(article.lastModified).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </div>
+            <p style={{ marginTop: '.75rem', fontSize: '.78rem', fontStyle: 'italic', opacity: '.65' }}>
+              Last updated: {new Date(article.lastModified).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
           )}
         </footer>
       </article>

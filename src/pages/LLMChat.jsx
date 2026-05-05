@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const LLMChat = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
       role: 'assistant',
-      content: 'Hello! I\'m an AI assistant powered by a locally deployed open-source SLM/LLM. I can help you with various tasks. Feel free to ask me anything!',
+      content: "Hello! I'm an AI assistant powered by a locally deployed open-source SLM/LLM. I can help you with various tasks. Feel free to ask me anything!",
       timestamp: new Date()
     }
   ]);
@@ -17,19 +17,17 @@ const LLMChat = () => {
   const [isStreaming, setIsStreaming] = useState(true);
   const messagesBoxRef = useRef(null);
 
-  const BACKEND_URL = 'https://api.thepk.in'; // Change to your backend URL
+  const BACKEND_URL = 'https://api.thepk.in';
   const API_KEY = 'your-secure-api-key-change-this-in-production';
 
-  // Fetch available models on mount
   useEffect(() => {
-    const initializeChat = async () => {
+    const init = async () => {
       await checkBackendHealth();
       await fetchModels();
     };
-    initializeChat();
+    init();
   }, []);
 
-  // Auto-scroll to bottom of messages
   useEffect(() => {
     if (messagesBoxRef.current) {
       messagesBoxRef.current.scrollTop = messagesBoxRef.current.scrollHeight;
@@ -38,57 +36,118 @@ const LLMChat = () => {
 
   const checkBackendHealth = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/health`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Backend service is not available');
-      }
-
-      console.log('Backend health check: OK');
-    } catch (err) {
-      console.warn('Backend health check failed:', err.message);
-      setError('Warning: Backend service may not be available. Check your BACKEND_URL.');
+      const response = await fetch(`${BACKEND_URL}/health`);
+      if (!response.ok) throw new Error('Backend service is not available');
+    } catch {
+      setError('Warning: Backend service may not be available.');
     }
   };
 
   const fetchModels = async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/llm/models`, {
-        method: 'GET',
-        headers: {
-          'x-api-key': API_KEY,
-          'Content-Type': 'application/json'
-        }
+        headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' }
       });
-
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Failed to fetch models: ${response.status} ${JSON.stringify(errorData.detail || '')}`);
+        const d = await response.json().catch(() => ({}));
+        throw new Error(`${response.status} ${JSON.stringify(d.detail || '')}`);
       }
-
       const data = await response.json();
-
-      // Validate response structure according to ModelsResponse schema
-      if (!data.models || !Array.isArray(data.models)) {
-        throw new Error('Invalid models response format');
-      }
-
-      if (data.models.length === 0) {
-        throw new Error('No models available on backend. Please ensure Ollama is running with Llama 3.2 model.');
-      }
-
+      if (!data.models || !Array.isArray(data.models)) throw new Error('Invalid models response');
+      if (data.models.length === 0) throw new Error('No models available. Ensure Ollama is running.');
       setModels(data.models);
       setSelectedModel(data.models[0].name);
-      setError(''); // Clear any previous errors
+      setError('');
     } catch (err) {
       setError('Failed to load models: ' + err.message);
-      console.error('Error fetching models:', err);
     }
+  };
+
+  const processStreamLine = useCallback((line, onText) => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith(':')) return;
+    if (trimmed.startsWith('data: ')) {
+      try {
+        const data = JSON.parse(trimmed.slice(6));
+        if (data.done === true) return;
+        if (data.text) onText(data.text);
+        else if (typeof data === 'string') onText(data);
+      } catch {
+        // ignore malformed lines
+      }
+    }
+  }, []);
+
+  const handleStreamingResponse = async (messageId, prompt) => {
+    const response = await fetch(`${BACKEND_URL}/api/llm/stream`, {
+      method: 'POST',
+      headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: selectedModel, prompt, stream: true })
+    });
+    if (!response.ok) {
+      const txt = await response.text();
+      throw new Error(`HTTP ${response.status}: ${txt || 'Stream failed'}`);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    let buffer = '';
+    const assistantMsg = { id: messageId + 1, role: 'assistant', content: '', timestamp: new Date() };
+    setMessages(prev => [...prev, assistantMsg]);
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        if (buffer.trim()) {
+          buffer.split('\n').forEach(line => processStreamLine(line, t => {
+            fullText += t;
+            setMessages(prev => prev.map(m => m.id === assistantMsg.id ? { ...m, content: fullText } : m));
+          }));
+        }
+        break;
+      }
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      lines.forEach(line => processStreamLine(line, t => {
+        fullText += t;
+        setMessages(prev => prev.map(m => m.id === assistantMsg.id ? { ...m, content: fullText } : m));
+      }));
+    }
+
+    const final = decoder.decode();
+    if (final) {
+      (buffer + final).split('\n').forEach(line => processStreamLine(line, t => {
+        fullText += t;
+        setMessages(prev => prev.map(m => m.id === assistantMsg.id ? { ...m, content: fullText } : m));
+      }));
+    }
+  };
+
+  const handleNonStreamingResponse = async (messageId, prompt) => {
+    const response = await fetch(`${BACKEND_URL}/api/llm/generate`, {
+      method: 'POST',
+      headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: selectedModel, prompt, stream: false })
+    });
+    if (!response.ok) {
+      const txt = await response.text();
+      throw new Error(`HTTP ${response.status}: ${txt || 'Generate failed'}`);
+    }
+    const data = await response.json();
+    let responseText = '';
+    if (typeof data === 'string') responseText = data;
+    else if (data.text) responseText = data.text;
+    else if (data.response) responseText = data.response;
+    else if (data.generated_text) responseText = data.generated_text;
+    else if (data.content) responseText = data.content;
+    else {
+      const first = Object.values(data).find(v => typeof v === 'string');
+      responseText = first || JSON.stringify(data);
+    }
+    if (!responseText.trim()) throw new Error('Empty response from model');
+    setMessages(prev => [...prev, { id: messageId + 1, role: 'assistant', content: responseText, timestamp: new Date() }]);
   };
 
   const sendMessage = async (e) => {
@@ -96,235 +155,36 @@ const LLMChat = () => {
     if (!inputValue.trim() || !selectedModel || isLoading) return;
 
     const prompt = inputValue.trim();
-    const userMessage = {
-      id: messages.length + 1,
-      role: 'user',
-      content: prompt,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(prev => [...prev, { id: prev.length + 1, role: 'user', content: prompt, timestamp: new Date() }]);
     setInputValue('');
     setIsLoading(true);
     setError('');
 
     try {
       if (isStreaming) {
-        await handleStreamingResponse(userMessage.id, prompt);
+        await handleStreamingResponse(messages.length + 1, prompt);
       } else {
-        await handleNonStreamingResponse(userMessage.id, prompt);
+        await handleNonStreamingResponse(messages.length + 1, prompt);
       }
     } catch (err) {
       setError('Error: ' + err.message);
-      setMessages(prev => [...prev, {
-        id: messages.length + 2,
-        role: 'assistant',
-        content: `Error: ${err.message}`,
-        timestamp: new Date()
-      }]);
+      setMessages(prev => [...prev, { id: prev.length + 1, role: 'assistant', content: `Error: ${err.message}`, timestamp: new Date() }]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleStreamingResponse = async (messageId, prompt) => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/llm/stream`, {
-        method: 'POST',
-        headers: {
-          'x-api-key': API_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: selectedModel,
-          prompt,
-          stream: true
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorData || 'Stream request failed'}`);
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullText = '';
-      let buffer = '';
-
-      const assistantMessage = {
-        id: messageId + 1,
-        role: 'assistant',
-        content: '',
-        timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-
-      while (true) {
-        const { done, value } = await reader.read();
-
-        if (done) {
-          // Process any remaining buffer content
-          if (buffer.trim()) {
-            const lines = buffer.split('\n');
-            for (const line of lines) {
-              processStreamLine(line, (text) => {
-                fullText += text;
-                setMessages(prev =>
-                  prev.map(msg => msg.id === assistantMessage.id ? { ...msg, content: fullText } : msg)
-                );
-              });
-            }
-          }
-          break;
-        }
-
-        // Decode the chunk and add to buffer
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-
-        // Process all complete lines, keep the last incomplete line in buffer
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          processStreamLine(line, (text) => {
-            fullText += text;
-            setMessages(prev =>
-              prev.map(msg => msg.id === assistantMessage.id ? { ...msg, content: fullText } : msg)
-            );
-          });
-        }
-      }
-
-      // Final decoder flush
-      const finalChunk = decoder.decode();
-      if (finalChunk) {
-        buffer += finalChunk;
-        const lines = buffer.split('\n');
-        for (const line of lines) {
-          processStreamLine(line, (text) => {
-            fullText += text;
-            setMessages(prev =>
-              prev.map(msg => msg.id === assistantMessage.id ? { ...msg, content: fullText } : msg)
-            );
-          });
-        }
-      }
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  const processStreamLine = (line, onText) => {
-    const trimmedLine = line.trim();
-
-    // Skip empty lines and comments
-    if (!trimmedLine || trimmedLine.startsWith(':')) return;
-
-    // Handle SSE format: "data: {json}"
-    if (trimmedLine.startsWith('data: ')) {
-      try {
-        const jsonStr = trimmedLine.slice(6);
-        const data = JSON.parse(jsonStr);
-
-        // Check for completion signal
-        if (data.done === true) {
-          console.log('Stream completed');
-          return;
-        }
-
-        // Extract text from response
-        if (data.text) {
-          onText(data.text);
-        } else if (typeof data === 'string') {
-          // Handle case where the entire object is the text
-          onText(data);
-        }
-      } catch (e) {
-        console.warn('Failed to parse stream line:', line, e);
-      }
-    }
-  };
-
-  const handleNonStreamingResponse = async (messageId, prompt) => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/llm/generate`, {
-        method: 'POST',
-        headers: {
-          'x-api-key': API_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: selectedModel,
-          prompt,
-          stream: false
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorData || 'Generate request failed'}`);
-      }
-
-      const data = await response.json();
-      console.log('Non-streaming response:', data);
-
-      // Handle various possible response formats from the backend
-      let responseText = '';
-
-      if (typeof data === 'string') {
-        // If response is a plain string
-        responseText = data;
-      } else if (data.text) {
-        // If response has 'text' field
-        responseText = data.text;
-      } else if (data.response) {
-        // If response has 'response' field
-        responseText = data.response;
-      } else if (data.generated_text) {
-        // If response has 'generated_text' field
-        responseText = data.generated_text;
-      } else if (data.content) {
-        // If response has 'content' field
-        responseText = data.content;
-      } else if (Object.keys(data).length > 0) {
-        // If response is a complex object, try to find the first string value
-        const firstStringValue = Object.values(data).find(v => typeof v === 'string');
-        responseText = firstStringValue || JSON.stringify(data);
-      } else {
-        // Fallback
-        responseText = 'No response received from model';
-      }
-
-      if (!responseText || responseText.trim() === '') {
-        throw new Error('Received empty response from model');
-      }
-
-      const assistantMessage = {
-        id: messageId + 1,
-        role: 'assistant',
-        content: responseText,
-        timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (err) {
-      throw err;
-    }
-  };
-
   return (
     <div className="llm-chat-page">
-      <header className="chat-header">
-        <h1>AI Chat (SLM/LLM)</h1>
-        <p>Chat with a locally deployed SLM model • Showcasing MLOps capabilities</p>
+      <header className="page-header">
+        <h1 className="page-title">AI Chat</h1>
+        <p className="page-subtitle">Locally deployed SLM/LLM — MLOps showcase</p>
       </header>
 
       <div className="chat-container">
         <div className="chat-sidebar">
-          <div className="model-selector">
-            <label htmlFor="model-select">Model:</label>
+          <div className="chat-sidebar-section">
+            <label className="chat-label" htmlFor="model-select">Model</label>
             <select
               id="model-select"
               value={selectedModel}
@@ -332,88 +192,84 @@ const LLMChat = () => {
               className="model-select"
             >
               {models.map(model => (
-                <option key={model.name} value={model.name}>
-                  {model.name}
-                </option>
+                <option key={model.name} value={model.name}>{model.name}</option>
               ))}
             </select>
           </div>
 
-          <div className="streaming-toggle">
-            <label>
+          <div className="chat-sidebar-section">
+            <label className="chat-label">
               <input
                 type="checkbox"
                 checked={isStreaming}
                 onChange={(e) => setIsStreaming(e.target.checked)}
+                style={{ marginRight: '.4rem' }}
               />
-              <span>Streaming Response</span>
+              Streaming Response
             </label>
           </div>
 
-          <div className="chat-info">
-            <h3>About This Demo</h3>
-            <p><strong>MLOps Skills:</strong> This chat demonstrates my ability to deploy, serve, and optimize SLM/LLMs in production environments.</p>
-            <ul>
-              <li>Model serving & inference optimization</li>
-              <li>Streaming & non-streaming responses</li>
-              <li>API authentication & security</li>
-              <li>Error handling & resilience</li>
+          <div className="chat-sidebar-section">
+            <h3 className="chat-sidebar-heading">MLOps Skills</h3>
+            <ul className="chat-sidebar-list">
+              <li>Model serving &amp; inference optimization</li>
+              <li>Streaming &amp; non-streaming responses</li>
+              <li>API authentication &amp; security</li>
+              <li>Error handling &amp; resilience</li>
             </ul>
+          </div>
 
-            <h3 style={{marginTop: '1.5rem'}}>Hardware</h3>
-            <p><strong>Running on:</strong> AZW MINI S Mini PC</p>
-            <ul style={{fontSize: '0.8rem'}}>
-              <li><strong>CPU:</strong> Intel N150 (4 cores, 3.6 GHz)</li>
-              <li><strong>RAM:</strong> 16GB DDR4 3200MHz</li>
-              <li><strong>Cache:</strong> 6MB L3 Cache</li>
-              <li><strong>Storage:</strong> 512GB SSD</li>
+          <div className="chat-sidebar-section">
+            <h3 className="chat-sidebar-heading">Hardware</h3>
+            <p className="chat-sidebar-body">AZW MINI S Mini PC</p>
+            <ul className="chat-sidebar-list">
+              <li><strong>CPU:</strong> Intel N150 (4c, 3.6 GHz)</li>
+              <li><strong>RAM:</strong> 16 GB DDR4</li>
+              <li><strong>Storage:</strong> 512 GB SSD</li>
             </ul>
-            <p style={{fontSize: '0.8rem', marginTop: '0.8rem', opacity: 0.8}}>Showcasing efficient LLM deployment on compact, power-efficient hardware</p>
           </div>
         </div>
 
         <div className="chat-main">
           {error && (
-            <div className="error-banner">
+            <div className="chat-error-banner">
               <p>{error}</p>
               <button onClick={() => setError('')}>×</button>
             </div>
           )}
 
-          <div className="messages-container" ref={messagesBoxRef}>
+          <div className="messages-box" ref={messagesBoxRef}>
             {messages.map(message => (
-              <div key={message.id} className={`message message-${message.role}`}>
-                <div className="message-content">
-                  <p>{message.content}</p>
-                </div>
-                <span className="message-time">
+              <div key={message.id} className={`msg msg-${message.role}`}>
+                <div className="msg-bubble">{message.content}</div>
+                <span className="msg-time">
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
             ))}
             {isLoading && (
-              <div className="message message-loading">
-                <div className="loading-dots">
-                  <span></span>
-                  <span></span>
-                  <span></span>
+              <div className="msg msg-assistant">
+                <div className="msg-dots">
+                  <span className="dot"></span>
+                  <span className="dot"></span>
+                  <span className="dot"></span>
                 </div>
               </div>
             )}
           </div>
 
-          <form onSubmit={sendMessage} className="chat-input-form">
+          <form onSubmit={sendMessage} className="chat-form">
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Type your message..."
-              className="chat-input"
+              className="chat-input-field"
               disabled={isLoading || models.length === 0}
             />
             <button
               type="submit"
-              className="send-button"
+              className="chat-send-btn"
               disabled={isLoading || !inputValue.trim() || models.length === 0}
             >
               Send
