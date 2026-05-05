@@ -8,6 +8,16 @@ const DCMetro = () => {
         <p className="page-subtitle">Real-time Washington DC Metro transit information</p>
       </header>
       <div className="dcmetro-embed">
+        <div className="dcmetro-toolbar">
+          <a
+            href="https://dc-metro.thepk.in/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="dcmetro-open-btn"
+          >
+            Open full screen ↗
+          </a>
+        </div>
         <iframe
           src="https://dc-metro.thepk.in/"
           title="DC Metro"
