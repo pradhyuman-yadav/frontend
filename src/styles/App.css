@@ -6786,6 +6786,22 @@ body {
   flex-shrink: 0;
 }
 
+/* DC Metro embedded page */
+.dcmetro-embed {
+  border-top: var(--rule-thick) solid var(--ink);
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.dcmetro-iframe {
+  width: 100%;
+  height: 75vh;
+  min-height: 500px;
+  border: none;
+  display: block;
+}
+
 /* ========== END NEWSPAPER DESIGN ADDITIONS ========== */
 
 /* Print styles */

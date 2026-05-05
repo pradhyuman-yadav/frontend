@@ -29,6 +29,9 @@ const Navigation = () => {
       <Link to="/pipeline" className={isActive('/pipeline') ? 'active' : ''}>
         Pipeline
       </Link>
+      <Link to="/dc-metro" className={isActive('/dc-metro') ? 'active' : ''}>
+        DC Metro
+      </Link>
 
       {/* External Services */}
       <div className="nav-divider"></div>
