@@ -2,25 +2,31 @@ import { Link, useLocation } from 'react-router-dom';
 
 const Navigation = () => {
   const location = useLocation();
+  const p = location.pathname;
+
+  const isActive = (path) => {
+    if (path === '/') return p === '/';
+    return p === path || p.startsWith(path + '/');
+  };
 
   return (
     <nav className="navigation">
-      <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
+      <Link to="/" className={isActive('/') ? 'active' : ''}>
         Home
       </Link>
-      <Link to="/articles" className={location.pathname === '/articles' ? 'active' : ''}>
+      <Link to="/articles" className={isActive('/articles') ? 'active' : ''}>
         Articles
       </Link>
-      <Link to="/tools" className={location.pathname === '/tools' ? 'active' : ''}>
+      <Link to="/tools" className={isActive('/tools') ? 'active' : ''}>
         Tools
       </Link>
-      <Link to="/about" className={location.pathname === '/about' ? 'active' : ''}>
+      <Link to="/about" className={isActive('/about') ? 'active' : ''}>
         About Me
       </Link>
-      <Link to="/llm-chat" className={location.pathname === '/llm-chat' ? 'active' : ''}>
+      <Link to="/llm-chat" className={isActive('/llm-chat') ? 'active' : ''}>
         AI Chat (SLM)
       </Link>
-      <Link to="/pipeline" className={location.pathname === '/pipeline' ? 'active' : ''}>
+      <Link to="/pipeline" className={isActive('/pipeline') ? 'active' : ''}>
         Pipeline
       </Link>
 

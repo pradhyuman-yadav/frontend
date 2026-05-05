@@ -552,6 +552,7 @@ export const transformProjects = (items) => {
   if (!Array.isArray(items)) return [];
 
   return items
+    .sort((a, b) => (a.data?.displayOrder?.iv || 0) - (b.data?.displayOrder?.iv || 0))
     .map(item => {
       const endDate = item.data?.endDate?.iv || item.data?.startDate?.iv;
       return {

@@ -1,26 +1,45 @@
 /* Black & White A4 Page Style Theme */
 :root {
-  --bg-color: #F5F5DC;
-  --page-bg: #F5F5DC;
-  --text-color: #000000;
-  --border-color: #000000;
-  --accent-color: #000000;
-  --header-bg: #F5F5DC;
-  --nav-hover: #EBE8D5;
-  --shadow-color: rgba(0, 0, 0, 0.15);
-  --hover-text-color: #000000;
+  --bg-color: #F2F2F0;
+  --page-bg: #FAFAF8;
+  --text-color: #1A1A1A;
+  --border-color: #CCCCCC;
+  --accent-color: #1A1A1A;
+  --header-bg: #FAFAF8;
+  --nav-hover: #EBEBEB;
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --hover-text-color: #1A1A1A;
+
+  /* Design token aliases */
+  --bg: #F2F2F0;
+  --page: #FAFAF8;
+  --ink: #1A1A1A;
+  --border: #CCCCCC;
+  --muted: #EBEBEB;
+  --shadow: rgba(0, 0, 0, 0.08);
+  --font-serif: 'Times New Roman', 'Georgia', serif;
+  --font-mono: 'Courier New', monospace;
+  --page-w: 210mm;
 }
 
-[data-theme="dark"] {
-  --bg-color: #1a1a1a;
-  --page-bg: #000000;
-  --text-color: #F5F5DC;
-  --border-color: #0e0c0c;
-  --accent-color: #F5F5DC;
-  --header-bg: #000000;
-  --nav-hover: #333333;
-  --shadow-color: rgba(255, 255, 255, 0.3);
-  --hover-text-color: #F5F5DC;
+[data-theme="dark"],
+[data-dark="1"] {
+  --bg-color: #141414;
+  --page-bg: #1C1C1E;
+  --text-color: #F5F5F0;
+  --border-color: #3A3A3C;
+  --accent-color: #F5F5F0;
+  --header-bg: #1C1C1E;
+  --nav-hover: #2C2C2E;
+  --shadow-color: rgba(0, 0, 0, 0.4);
+  --hover-text-color: #F5F5F0;
+
+  --bg: #141414;
+  --page: #1C1C1E;
+  --ink: #F5F5F0;
+  --border: #3A3A3C;
+  --muted: #2C2C2E;
+  --shadow: rgba(0, 0, 0, 0.4);
 }
 
 /* Reset and base styles */
@@ -6001,6 +6020,88 @@ body {
     font-size: 0.65rem;
   }
 }
+
+/* ========== DESIGN SYSTEM ADDITIONS ========== */
+
+/* Section header — design's key divider pattern */
+.section-header {
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--border);
+  padding: .75rem 0;
+  margin: 2rem 0 1.25rem;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-family: var(--font-serif);
+  color: var(--ink);
+}
+
+/* Stats bar — horizontal stat display */
+.stats-bar {
+  display: flex;
+  border: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+
+.stat {
+  flex: 1;
+  text-align: center;
+  padding: 1rem 0;
+  border-right: 1px solid var(--border);
+}
+
+.stat:last-child {
+  border-right: none;
+}
+
+.stat-num {
+  display: block;
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 0.3rem;
+}
+
+/* Social links in profile header */
+.social-links {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.social-link {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: opacity 0.2s ease;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1px;
+}
+
+.social-link:hover {
+  opacity: 0.6;
+}
+
+/* Initials avatar — shown when no profile image */
+.initials-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--ink);
+  flex-shrink: 0;
+  letter-spacing: 2px;
+  font-family: var(--font-serif);
+}
+
+/* ========== END DESIGN SYSTEM ADDITIONS ========== */
 
 /* Print styles */
 @media print {

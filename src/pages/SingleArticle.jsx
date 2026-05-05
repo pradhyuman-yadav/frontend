@@ -11,36 +11,45 @@ const SingleArticle = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchArticle = async () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const articles = await fetchSquidexArticles();
+        if (cancelled) return;
+
         const foundArticle = articles.find(art => art.id === id);
 
         if (!foundArticle) {
           throw new Error('Article not found');
         }
 
-        // Process article using shared utility
         const processedArticle = processArticleData(foundArticle);
+        if (cancelled) return;
 
         setArticle(processedArticle);
       } catch (err) {
+        if (cancelled) return;
         console.error('Error fetching article:', err);
         setError(`Failed to load article: ${err.message}`);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchArticle();
+    return () => { cancelled = true; };
   }, [id]);
 
   if (loading) {
     return (
       <div className="single-article-page">
+        <button className="back-button" onClick={() => navigate('/articles')}>
+          ← Back to Articles
+        </button>
         <p>Loading article...</p>
       </div>
     );
@@ -49,6 +58,9 @@ const SingleArticle = () => {
   if (error) {
     return (
       <div className="single-article-page">
+        <button className="back-button" onClick={() => navigate('/articles')}>
+          ← Back to Articles
+        </button>
         <p>Error: {error}</p>
       </div>
     );
@@ -57,6 +69,9 @@ const SingleArticle = () => {
   if (!article) {
     return (
       <div className="single-article-page">
+        <button className="back-button" onClick={() => navigate('/articles')}>
+          ← Back to Articles
+        </button>
         <p>Article not found.</p>
       </div>
     );
@@ -64,13 +79,13 @@ const SingleArticle = () => {
 
   return (
     <div className="single-article-page">
-      <button 
-        className="back-button" 
+      <button
+        className="back-button"
         onClick={() => navigate('/articles')}
       >
         ← Back to Articles
       </button>
-      
+
       <article className="article-display">
         {article.featuredImage && (
           <figure className="article-featured-image">

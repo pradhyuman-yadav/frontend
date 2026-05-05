@@ -15,7 +15,7 @@ const LLMChat = () => {
   const [selectedModel, setSelectedModel] = useState('');
   const [error, setError] = useState('');
   const [isStreaming, setIsStreaming] = useState(true);
-  const messagesEndRef = useRef(null);
+  const messagesBoxRef = useRef(null);
 
   const BACKEND_URL = 'https://api.thepk.in'; // Change to your backend URL
   const API_KEY = 'your-secure-api-key-change-this-in-production';
@@ -31,7 +31,9 @@ const LLMChat = () => {
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesBoxRef.current) {
+      messagesBoxRef.current.scrollTop = messagesBoxRef.current.scrollHeight;
+    }
   }, [messages]);
 
   const checkBackendHealth = async () => {
@@ -93,10 +95,11 @@ const LLMChat = () => {
     e.preventDefault();
     if (!inputValue.trim() || !selectedModel || isLoading) return;
 
+    const prompt = inputValue.trim();
     const userMessage = {
       id: messages.length + 1,
       role: 'user',
-      content: inputValue,
+      content: prompt,
       timestamp: new Date()
     };
 
@@ -107,9 +110,9 @@ const LLMChat = () => {
 
     try {
       if (isStreaming) {
-        await handleStreamingResponse(userMessage.id);
+        await handleStreamingResponse(userMessage.id, prompt);
       } else {
-        await handleNonStreamingResponse(userMessage.id);
+        await handleNonStreamingResponse(userMessage.id, prompt);
       }
     } catch (err) {
       setError('Error: ' + err.message);
@@ -124,7 +127,7 @@ const LLMChat = () => {
     }
   };
 
-  const handleStreamingResponse = async (messageId) => {
+  const handleStreamingResponse = async (messageId, prompt) => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/llm/stream`, {
         method: 'POST',
@@ -134,7 +137,7 @@ const LLMChat = () => {
         },
         body: JSON.stringify({
           model: selectedModel,
-          prompt: inputValue,
+          prompt,
           stream: true
         })
       });
@@ -244,7 +247,7 @@ const LLMChat = () => {
     }
   };
 
-  const handleNonStreamingResponse = async (messageId) => {
+  const handleNonStreamingResponse = async (messageId, prompt) => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/llm/generate`, {
         method: 'POST',
@@ -254,7 +257,7 @@ const LLMChat = () => {
         },
         body: JSON.stringify({
           model: selectedModel,
-          prompt: inputValue,
+          prompt,
           stream: false
         })
       });
@@ -377,7 +380,7 @@ const LLMChat = () => {
             </div>
           )}
 
-          <div className="messages-container">
+          <div className="messages-container" ref={messagesBoxRef}>
             {messages.map(message => (
               <div key={message.id} className={`message message-${message.role}`}>
                 <div className="message-content">
@@ -397,7 +400,6 @@ const LLMChat = () => {
                 </div>
               </div>
             )}
-            <div ref={messagesEndRef} />
           </div>
 
           <form onSubmit={sendMessage} className="chat-input-form">

@@ -240,42 +240,7 @@ const Tools = () => {
     }
   };
 
-  const getCategoryColor = (category) => {
-    switch (category) {
-      case 'Web Development':
-        return '#E3F2FD';
-      case 'Machine Learning':
-        return '#F3E5F5';
-      case 'AI/ML':
-        return '#E8F5E8';
-      case 'Computer Vision':
-        return '#FFF3E0';
-      case 'Automation':
-        return '#FCE4EC';
-      case 'Hardware/IoT':
-        return '#F1F8E9';
-      case 'Git & Version Control':
-        return '#E8F5E8';
-      case 'Code Quality':
-        return '#E3F2FD';
-      case 'API Development':
-        return '#FFF3E0';
-      case 'Text Processing':
-        return '#F3E5F5';
-      case 'Data Processing':
-        return '#FCE4EC';
-      case 'Data Encoding':
-        return '#F1F8E9';
-      case 'Design Tools':
-        return '#E8F5E8';
-      case 'Security':
-        return '#FFEBEE';
-      case 'Utilities':
-        return '#E0F2F1';
-      default:
-        return '#F5F5F5';
-    }
-  };
+  const getCategoryColor = () => 'transparent';
 
   return (
     <div className="tools-page">
@@ -290,7 +255,7 @@ const Tools = () => {
 
           {/* Tools Section */}
           <section className="tools-section">
-            <h2 className="section-title">Tools</h2>
+            <h2 className="section-header">Tools</h2>
             {tools.length > 0 ? (
               <div className="tools-grid-simple">
                 {tools.map((tool) => (
@@ -312,7 +277,7 @@ const Tools = () => {
 
       {/* Projects Section */}
       <section className="projects-section">
-        <h2 className="section-title">Projects</h2>
+        <h2 className="section-header">Projects</h2>
         <div className="tools-grid">
           {projects.map((project) => (
             <div key={project.id} className="tool-card">
@@ -382,21 +347,21 @@ const Tools = () => {
       </section>
 
       <div className="tools-footer">
-        <div className="project-stats">
-          <div className="stat-item">
-            <span className="stat-number">{tools.length}</span>
+        <div className="stats-bar">
+          <div className="stat">
+            <span className="stat-num">{tools.length}</span>
             <span className="stat-label">Tools</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-number">{projects.length}</span>
+          <div className="stat">
+            <span className="stat-num">{projects.length}</span>
             <span className="stat-label">Projects</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-number">{projects.filter(p => p.status === 'Live').length}</span>
-            <span className="stat-label">Live Projects</span>
+          <div className="stat">
+            <span className="stat-num">{projects.filter(p => p.status === 'Live').length}</span>
+            <span className="stat-label">Live</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-number">{projects.filter(p => p.status === 'Completed').length}</span>
+          <div className="stat">
+            <span className="stat-num">{projects.filter(p => p.status === 'Completed').length}</span>
             <span className="stat-label">Completed</span>
           </div>
         </div>

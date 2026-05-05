@@ -19,35 +19,37 @@ const About = () => {
 
       <header className="page-header">
         <div className="profile-intro">
-          {about.profileImage && (
+          {about.profileImage ? (
             <img src={about.profileImage} alt={about.name} className="profile-image" />
+          ) : (
+            <div className="initials-avatar">PY</div>
           )}
           <div className="profile-content">
             {/* <h1 className="page-title">{about.name}</h1> */}
             {about.currentRole && <h3 className="current-role">{about.currentRole}</h3>}
 
             <div className="contact-header">
-              {about.location && <p className="location">📍 {about.location}</p>}
+              {about.location && <p className="location">{about.location}</p>}
               {about.phone && (
                 <a href={`tel:${about.phone}`} className="contact-link">
-                  ☎ {about.phone}
+                  {about.phone}
                 </a>
               )}
               {about.email && (
                 <a href={`mailto:${about.email}`} className="contact-link">
-                  ✉ {about.email}
+                  {about.email}
                 </a>
               )}
               {about.resumeFile && (
                 <a href={about.resumeFile} className="contact-link" target="_blank" rel="noopener noreferrer">
-                  📥 Resume
+                  Resume
                 </a>
               )}
               {about.socialLinks && about.socialLinks.length > 0 && (
                 <div className="social-links">
                   {about.socialLinks.map((link, idx) => (
                     <a key={idx} href={link.url} className="social-link" target="_blank" rel="noopener noreferrer">
-                      {link.label}
+                      {link.platform || link.label}
                     </a>
                   ))}
                 </div>
@@ -61,7 +63,7 @@ const About = () => {
 
       {about.bio && (
         <section className="about-section">
-          <h2 className="section-title">About</h2>
+          <h2 className="section-header">About</h2>
           <div className="summary-content">
             <p>{about.bio}</p>
           </div>
@@ -70,7 +72,7 @@ const About = () => {
 
       {education && education.length > 0 && (
         <section className="about-section">
-          <h2 className="section-title">Education</h2>
+          <h2 className="section-header">Education</h2>
           <div className="education-list">
             {education.map((edu, index) => (
               <div key={index} className="education-item">
@@ -117,7 +119,7 @@ const About = () => {
 
       {experience && experience.length > 0 && (
         <section className="about-section">
-          <h2 className="section-title">Work Experience</h2>
+          <h2 className="section-header">Work Experience</h2>
           <div className="experience-timeline">
             {experience.map((job, index) => (
               <div key={index} className="experience-item">
@@ -166,7 +168,7 @@ const About = () => {
 
       {projects && projects.length > 0 && (
         <section className="about-section">
-          <h2 className="section-title">Projects</h2>
+          <h2 className="section-header">Projects</h2>
           <div className="projects-list">
             {projects.map((project, index) => (
               <div key={index} className="project-card">
@@ -244,7 +246,7 @@ const About = () => {
 
       {skills && Object.keys(skills).length > 0 && (
         <section className="about-section">
-          <h2 className="section-title">Technical Skills</h2>
+          <h2 className="section-header">Technical Skills</h2>
           <div className="skills-grid">
             {Object.entries(skills).map(([category, skillList]) => (
               <div key={category} className="skill-category">
