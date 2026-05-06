@@ -1,6 +1,9 @@
 import React from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 
 const DCMetro = () => {
+  const { isDarkMode } = useTheme();
+
   return (
     <div className="dcmetro-page">
       <header className="page-header">
@@ -23,6 +26,7 @@ const DCMetro = () => {
           title="DC Metro"
           className="dcmetro-iframe"
           allow="geolocation"
+          style={isDarkMode ? { filter: 'invert(1) hue-rotate(180deg)' } : undefined}
         />
       </div>
     </div>
