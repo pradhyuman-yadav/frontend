@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 
 const DCMetro = () => {
   const { isDarkMode } = useTheme();
+  const iframeRef = useRef(null);
+
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    const theme = isDarkMode ? 'dark' : 'light';
+    const send = () => iframe.contentWindow?.postMessage({ type: 'SET_THEME', theme }, 'https://dc-metro.thepk.in');
+    iframe.addEventListener('load', send);
+    send();
+    return () => iframe.removeEventListener('load', send);
+  }, [isDarkMode]);
 
   return (
     <div className="dcmetro-page">
@@ -22,11 +33,11 @@ const DCMetro = () => {
           </a>
         </div>
         <iframe
+          ref={iframeRef}
           src="https://dc-metro.thepk.in/"
           title="DC Metro"
           className="dcmetro-iframe"
           allow="geolocation"
-          style={isDarkMode ? { filter: 'invert(1) hue-rotate(180deg)' } : undefined}
         />
       </div>
     </div>
