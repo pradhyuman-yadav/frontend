@@ -2,8 +2,13 @@ services:
   frontend:
     build:
       context: .
+      args:
+        VITE_SQUIDEX_APP_NAME: ${VITE_SQUIDEX_APP_NAME}
+        VITE_SQUIDEX_CLIENT_ID: ${VITE_SQUIDEX_CLIENT_ID}
+        VITE_SQUIDEX_CLIENT_SECRET: ${VITE_SQUIDEX_CLIENT_SECRET}
+        VITE_SQUIDEX_URL: ${VITE_SQUIDEX_URL}
     container_name: react-app
     ports:
-      - "3001:3001"
+      - "3001:80"
     restart: unless-stopped
     pull_policy: build

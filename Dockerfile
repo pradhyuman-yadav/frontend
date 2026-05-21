@@ -1,20 +1,33 @@
-# Dockerfile for React Frontend
-FROM node:20-alpine
+# syntax=docker/dockerfile:1.7
 
-# Set working directory
+FROM node:20-alpine AS build
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Add this line to fix execute permissions
-RUN chmod +x -R ./node_modules/.bin
-
-# Copy source code
 COPY . .
 
-# Expose port 3001
-EXPOSE 3001
+ARG VITE_SQUIDEX_APP_NAME
+ARG VITE_SQUIDEX_CLIENT_ID
+ARG VITE_SQUIDEX_CLIENT_SECRET
+ARG VITE_SQUIDEX_URL
+ENV VITE_SQUIDEX_APP_NAME=$VITE_SQUIDEX_APP_NAME \
+    VITE_SQUIDEX_CLIENT_ID=$VITE_SQUIDEX_CLIENT_ID \
+    VITE_SQUIDEX_CLIENT_SECRET=$VITE_SQUIDEX_CLIENT_SECRET \
+    VITE_SQUIDEX_URL=$VITE_SQUIDEX_URL
 
-# Start development server
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3001"]
+RUN npm run build
+
+
+FROM nginx:1.27-alpine AS runtime
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+
+EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget -q -O /dev/null http://127.0.0.1/ || exit 1
+
+CMD ["nginx", "-g", "daemon off;"]
