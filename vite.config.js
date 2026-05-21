@@ -7,6 +7,16 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 3001,
-    allowedHosts: ['thepk.in', 'localhost', '127.0.0.1']
+    allowedHosts: ['thepk.in', 'localhost', '127.0.0.1'],
+    fs: {
+      deny: [
+        '.env',
+        '.env.*',
+        '*.{pem,crt,key}',
+        'Dockerfile',
+        'docker-compose*.yml',
+        '.git/**'
+      ]
+    }
   }
 })
