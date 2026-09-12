@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '../../components/Toast';
 
 const TwoFAGenerator = () => {
   const navigate = useNavigate();
   const [secret, setSecret] = useState('');
   const [code, setCode] = useState('');
   const [timeLeft, setTimeLeft] = useState(30);
-  const [isGenerating, setIsGenerating] = useState(false);
 
   // Generate TOTP code
   const generateTOTP = (secretKey) => {
@@ -49,7 +49,7 @@ const TwoFAGenerator = () => {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    alert('Copied to clipboard!');
+    toast('Copied to clipboard!');
   };
 
   const clearAll = () => {

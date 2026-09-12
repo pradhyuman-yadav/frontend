@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '../../components/Toast';
 
 const ColorPaletteGenerator = () => {
   const navigate = useNavigate();
@@ -214,7 +215,7 @@ const ColorPaletteGenerator = () => {
 
   const copyToClipboard = (color) => {
     navigator.clipboard.writeText(getColorFormat(color));
-    alert(`Copied ${getColorFormat(color)} to clipboard!`);
+    toast(`Copied ${getColorFormat(color)} to clipboard!`);
   };
 
   const exportAsCSS = () => {
@@ -226,7 +227,7 @@ const ColorPaletteGenerator = () => {
     cssContent += '}';
 
     navigator.clipboard.writeText(cssContent);
-    alert('CSS variables copied to clipboard!');
+    toast('CSS variables copied to clipboard!');
   };
 
   const exportAsJson = () => {
@@ -249,7 +250,7 @@ const ColorPaletteGenerator = () => {
     }, null, 2);
 
     navigator.clipboard.writeText(jsonContent);
-    alert('JSON palette copied to clipboard!');
+    toast('JSON palette copied to clipboard!');
   };
 
   const downloadPaletteSwatch = () => {

@@ -1,58 +1,32 @@
-import { Link, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
-const Navigation = () => {
-  const location = useLocation();
-  const p = location.pathname;
+/**
+ * Primary navigation.
+ *
+ * Kept to three destinations so the bar renders on one line at every desktop
+ * width. The project pages (AI Chat, Pipeline, DC Metro) are surfaced from the
+ * home page's work grid, and the self-hosted service links live in the footer —
+ * they are infrastructure, not portfolio navigation.
+ */
+const LINKS = [
+  { to: '/articles', label: 'Writing' },
+  { to: '/tools', label: 'Tools' },
+  { to: '/about', label: 'About' },
+];
 
-  const isActive = (path) => {
-    if (path === '/') return p === '/';
-    return p === path || p.startsWith(path + '/');
-  };
-
-  return (
-    <nav className="navigation">
-      <Link to="/" className={isActive('/') ? 'active' : ''}>
-        Home
-      </Link>
-      <Link to="/articles" className={isActive('/articles') ? 'active' : ''}>
-        Articles
-      </Link>
-      <Link to="/tools" className={isActive('/tools') ? 'active' : ''}>
-        Tools
-      </Link>
-      <Link to="/about" className={isActive('/about') ? 'active' : ''}>
-        About Me
-      </Link>
-      <Link to="/llm-chat" className={isActive('/llm-chat') ? 'active' : ''}>
-        AI Chat (SLM)
-      </Link>
-      <Link to="/pipeline" className={isActive('/pipeline') ? 'active' : ''}>
-        Pipeline
-      </Link>
-      <Link to="/dc-metro" className={isActive('/dc-metro') ? 'active' : ''}>
-        DC Metro
-      </Link>
-
-      {/* External Services */}
-      <div className="nav-divider"></div>
-
-      <a href="https://home.thepk.in" className="nav-external-link" target="_blank" rel="noopener noreferrer">
-        Dashboard
-      </a>
-      <a href="https://portainer.thepk.in" className="nav-external-link" target="_blank" rel="noopener noreferrer">
-        Portainer
-      </a>
-      <a href="https://squidex.thepk.in" className="nav-external-link" target="_blank" rel="noopener noreferrer">
-        Squidex
-      </a>
-      <a href="https://n8n.thepk.in" className="nav-external-link" target="_blank" rel="noopener noreferrer">
-        n8n
-      </a>
-      <a href="https://excalidraw.thepk.in" className="nav-external-link" target="_blank" rel="noopener noreferrer">
-        Excalidraw
-      </a>
-    </nav>
-  );
-};
+const Navigation = ({ onNavigate }) => (
+  <nav className="navigation" aria-label="Primary">
+    {LINKS.map(({ to, label }) => (
+      <NavLink
+        key={to}
+        to={to}
+        onClick={onNavigate}
+        className={({ isActive }) => (isActive ? 'active' : '')}
+      >
+        {label}
+      </NavLink>
+    ))}
+  </nav>
+);
 
 export default Navigation;

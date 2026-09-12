@@ -1,18 +1,16 @@
 /**
- * ErrorMessage component
- * Displays error information when content fails to load
- * @param {String} message - Error message to display
+ * Inline notice for content that failed to load.
+ *
+ * Rendered as a quiet inline alert rather than a full-page error block: the
+ * page still shows fallback content behind it, so shouting is misleading.
  */
-const ErrorMessage = ({ message = 'An error occurred while loading content' }) => {
-  return (
-    <div className="error-message-container">
-      <div className="error-message">
-        <h3>⚠️ Error</h3>
-        <p>{message}</p>
-        <p className="error-note">Using fallback data to ensure the page still displays.</p>
-      </div>
-    </div>
-  );
-};
+const ErrorMessage = ({
+  message = 'Some content could not be loaded.',
+  tone = 'info',
+}) => (
+  <div className={`alert alert-${tone}`} role="status" aria-live="polite">
+    <span>{message}</span>
+  </div>
+);
 
 export default ErrorMessage;

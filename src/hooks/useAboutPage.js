@@ -114,11 +114,15 @@ export const useAboutPage = () => {
         };
 
         // Validate that we have at least some data
+        // transformSkills returns a category-keyed object, not an array, so it
+        // needs Object.keys rather than .length. The about record counts too:
+        // a profile with only a bio is still real content.
         const hasData =
           transformedData.education.length > 0 ||
           transformedData.experience.length > 0 ||
           transformedData.projects.length > 0 ||
-          transformedData.skills.length > 0;
+          Object.keys(transformedData.skills).length > 0 ||
+          Boolean(rawData.about && rawData.about.length > 0);
 
         if (hasData) {
           setData(transformedData);

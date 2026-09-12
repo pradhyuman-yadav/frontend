@@ -1,88 +1,101 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { fetchSquidexArticles } from '../services/cmsService';
 import { processArticleData } from '../utils/richTextConverter';
+import { useReveal } from '../hooks/useReveal';
+
+const formatDate = (value) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+};
 
 const Articles = () => {
   const [allArticles, setAllArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const revealRef = useReveal();
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchAll = async () => {
       try {
         setLoading(true);
         setError(null);
-        const { fetchSquidexArticles } = await import('../services/cmsService');
         const articles = await fetchSquidexArticles();
-        setAllArticles(articles.map(a => processArticleData(a)));
+        if (cancelled) return;
+        setAllArticles(articles.map((a) => processArticleData(a)));
       } catch (err) {
-        setError(err.message);
+        if (!cancelled) setError(err.message);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
+
     fetchAll();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  if (loading) {
-    return (
-      <div className="articles-page">
-        <header className="page-header">
-          <h1 className="page-title">Articles</h1>
-        </header>
-        <p className="state-msg">Loading articles…</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="articles-page">
-        <header className="page-header">
-          <h1 className="page-title">Articles</h1>
-        </header>
-        <p className="state-msg">Error: {error}</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="articles-page">
+    <div className="articles-page" ref={revealRef}>
       <header className="page-header">
-        <h1 className="page-title">Articles</h1>
-        <p className="page-subtitle">{allArticles.length} article{allArticles.length !== 1 ? 's' : ''}</p>
+        <h1 className="page-title">Writing</h1>
+        <p className="page-subtitle">
+          {loading
+            ? 'Loading posts…'
+            : `${allArticles.length} post${allArticles.length === 1 ? '' : 's'} on building, hosting, and shipping things.`}
+        </p>
       </header>
 
-      <div className="articles-list">
-        {allArticles.map((article) => (
-          <div
-            key={article.id}
-            className="article-card"
-            onClick={() => navigate(`/article/${article.id}`)}
-            style={{ cursor: 'pointer' }}
-          >
-            <h3 className="article-card-title">{article.title}</h3>
-            <div className="article-card-meta">
-              {article.author && <span>By {article.author}</span>}
-              {article.publishDate && (
-                <time>{new Date(article.publishDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
-              )}
-              {article.readingTime && <span>{article.readingTime} min read</span>}
-            </div>
-            {article.excerpt && (
-              <p className="article-card-excerpt">{article.excerpt}</p>
-            )}
-            {article.tags && article.tags.length > 0 && (
-              <div className="article-card-tags">
-                {article.tags.map((tag, i) => (
-                  <span key={i} className="art-tag">{tag}</span>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+      {error && (
+        <div className="alert alert-error" role="alert">
+          <span>Could not load posts. {error}</span>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="skeleton-stack" aria-hidden="true">
+          <div className="skeleton skeleton-card" />
+          <div className="skeleton skeleton-card" />
+          <div className="skeleton skeleton-card" />
+        </div>
+      ) : allArticles.length === 0 && !error ? (
+        <p className="state-msg">No posts published yet. Check back soon.</p>
+      ) : (
+        <div className="articles-list">
+          {allArticles.map((article, i) => {
+            const published = formatDate(article.publishDate);
+            return (
+              <Link
+                key={article.id}
+                to={`/article/${article.id}`}
+                className="article-card reveal"
+                style={{ '--reveal-delay': `${Math.min(i, 6) * 60}ms` }}
+              >
+                <h2 className="article-card-title">{article.title}</h2>
+                <div className="article-card-meta">
+                  {article.author && <span>{article.author}</span>}
+                  {published && <time>{published}</time>}
+                  {article.readingTime > 0 && <span>{article.readingTime} min read</span>}
+                </div>
+                {article.excerpt && <p className="article-card-excerpt">{article.excerpt}</p>}
+                {article.tags?.length > 0 && (
+                  <div className="article-card-tags">
+                    {article.tags.map((tag, t) => (
+                      <span key={t} className="art-tag">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

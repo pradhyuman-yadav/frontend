@@ -1,5 +1,26 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '../../components/Toast';
+
+/**
+ * Draws `count` characters uniformly from `charset` using the Web Crypto API.
+ * Rejection sampling removes the modulo bias a plain `% charset.length` has.
+ */
+const randomChars = (charset, count) => {
+  const max = Math.floor(256 / charset.length) * charset.length;
+  let out = '';
+
+  while (out.length < count) {
+    const bytes = new Uint8Array(count - out.length);
+    crypto.getRandomValues(bytes);
+    for (const byte of bytes) {
+      if (byte < max) out += charset.charAt(byte % charset.length);
+      if (out.length === count) break;
+    }
+  }
+
+  return out;
+};
 
 const PasswordGenerator = () => {
   const navigate = useNavigate();
@@ -24,21 +45,22 @@ const PasswordGenerator = () => {
     }
     
     if (charset === '') {
-      alert('Please select at least one character type');
+      toast('Please select at least one character type');
       return;
     }
     
-    let generatedPassword = '';
-    for (let i = 0; i < length; i++) {
-      generatedPassword += charset.charAt(Math.floor(Math.random() * charset.length));
-    }
-    
+    // crypto.getRandomValues, not Math.random: this tool exists to produce
+    // secure passwords, and Math.random is not cryptographically secure.
+    // Values above the largest whole multiple of charset.length are rejected
+    // so the modulo does not bias the first characters of the set.
+    const generatedPassword = randomChars(charset, length);
+
     setPassword(generatedPassword);
   };
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(password);
-    alert('Password copied to clipboard!');
+    toast('Password copied to clipboard!');
   };
 
   const clearAll = () => {

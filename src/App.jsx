@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Articles from './pages/Articles';
 import SingleArticle from './pages/SingleArticle';
 import Tools from './pages/Tools';
 import About from './pages/About';
+import NotFound from './pages/NotFound';
 import GitCommitGenerator from './pages/tools/GitCommitGenerator';
 import CodeFormatter from './pages/tools/CodeFormatter';
 import JsonValidator from './pages/tools/JsonValidator';
@@ -23,36 +25,48 @@ import Pipeline from './pages/Pipeline';
 import DCMetro from './pages/DCMetro';
 import './styles/App.css';
 
-function App() {
-  useEffect(() => {
-    document.title = 'Pradhyuman Yadav';
-  }, []);
+/** Reset scroll position on navigation, the way a full page load would. */
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
 
+  useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
+  }, [pathname]);
+
+  return null;
+};
+
+function App() {
   return (
     <ThemeProvider>
       <Router>
+        <ScrollToTop />
         <Layout>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/articles" element={<Articles />} />
-            <Route path="/article/:id" element={<SingleArticle />} />
-            <Route path="/tools" element={<Tools />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/tools/git-commit-generator" element={<GitCommitGenerator />} />
-            <Route path="/tools/code-formatter" element={<CodeFormatter />} />
-            <Route path="/tools/json-validator" element={<JsonValidator />} />
-            <Route path="/tools/password-generator" element={<PasswordGenerator />} />
-            <Route path="/tools/2fa-generator" element={<TwoFAGenerator />} />
-            <Route path="/tools/qr-generator" element={<QRGenerator />} />
-            <Route path="/tools/color-palette" element={<ColorPaletteGenerator />} />
-            <Route path="/tools/api-tester" element={<APITester />} />
-            <Route path="/tools/regex-builder" element={<RegexBuilder />} />
-            <Route path="/tools/base64-converter" element={<Base64Converter />} />
-            <Route path="/tools/portrait-processor" element={<PortraitProcessor />} />
-            <Route path="/llm-chat" element={<LLMChat />} />
-            <Route path="/pipeline" element={<Pipeline />} />
-            <Route path="/dc-metro" element={<DCMetro />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/articles" element={<Articles />} />
+              <Route path="/article/:id" element={<SingleArticle />} />
+              <Route path="/tools" element={<Tools />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/tools/git-commit-generator" element={<GitCommitGenerator />} />
+              <Route path="/tools/code-formatter" element={<CodeFormatter />} />
+              <Route path="/tools/json-validator" element={<JsonValidator />} />
+              <Route path="/tools/password-generator" element={<PasswordGenerator />} />
+              <Route path="/tools/2fa-generator" element={<TwoFAGenerator />} />
+              <Route path="/tools/qr-generator" element={<QRGenerator />} />
+              <Route path="/tools/color-palette" element={<ColorPaletteGenerator />} />
+              <Route path="/tools/api-tester" element={<APITester />} />
+              <Route path="/tools/regex-builder" element={<RegexBuilder />} />
+              <Route path="/tools/base64-converter" element={<Base64Converter />} />
+              <Route path="/tools/portrait-processor" element={<PortraitProcessor />} />
+              <Route path="/llm-chat" element={<LLMChat />} />
+              <Route path="/pipeline" element={<Pipeline />} />
+              <Route path="/dc-metro" element={<DCMetro />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </ErrorBoundary>
         </Layout>
       </Router>
     </ThemeProvider>

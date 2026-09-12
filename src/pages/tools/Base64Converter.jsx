@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '../../components/Toast';
+import { readStored } from '../../utils/storage';
 
 const Base64Converter = () => {
   const navigate = useNavigate();
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [mode, setMode] = useState('encode');
-  const [outputType, setOutputType] = useState('text');
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('converter');
   const [savedConversions, setSavedConversions] = useState(
-    JSON.parse(localStorage.getItem('base64Conversions')) || []
+    readStored('base64Conversions')
   );
 
   const encode = () => {
@@ -23,7 +24,7 @@ const Base64Converter = () => {
       const encoded = btoa(unescape(encodeURIComponent(input)));
       setOutput(encoded);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to encode. Please check your input.');
     }
   };
@@ -38,7 +39,7 @@ const Base64Converter = () => {
       const decoded = decodeURIComponent(escape(atob(input)));
       setOutput(decoded);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Invalid Base64 format. Please check your input.');
     }
   };
@@ -56,7 +57,7 @@ const Base64Converter = () => {
         .replace(/=/g, '');
       setOutput(encoded);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to encode. Please check your input.');
     }
   };
@@ -76,7 +77,7 @@ const Base64Converter = () => {
       const decoded = decodeURIComponent(escape(atob(base64)));
       setOutput(decoded);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Invalid URL-safe Base64 format. Please check your input.');
     }
   };
@@ -91,7 +92,7 @@ const Base64Converter = () => {
         const base64String = event.target.result;
         setOutput(base64String);
         setError(null);
-      } catch (err) {
+      } catch {
         setError('Failed to encode image.');
       }
     };
@@ -111,7 +112,7 @@ const Base64Converter = () => {
       }
       setOutput(input);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to process image data.');
     }
   };
@@ -130,7 +131,7 @@ const Base64Converter = () => {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(output);
-    alert('Copied to clipboard!');
+    toast('Copied to clipboard!');
   };
 
   const saveConversion = () => {
@@ -150,7 +151,7 @@ const Base64Converter = () => {
     const updated = [conversion, ...savedConversions];
     setSavedConversions(updated);
     localStorage.setItem('base64Conversions', JSON.stringify(updated));
-    alert('Conversion saved successfully!');
+    toast('Conversion saved successfully!');
   };
 
   const deleteConversion = (id) => {
@@ -162,7 +163,7 @@ const Base64Converter = () => {
   const loadConversion = (conversion) => {
     setMode(conversion.mode);
     // We only save snippets, so show what was saved
-    alert(`Saved at ${conversion.timestamp}\nInput: ${conversion.input}...\nOutput: ${conversion.output}...`);
+    toast(`Saved at ${conversion.timestamp}\nInput: ${conversion.input}...\nOutput: ${conversion.output}...`);
   };
 
   const clearAll = () => {

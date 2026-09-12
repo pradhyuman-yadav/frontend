@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '../../components/Toast';
 
 const QRGenerator = () => {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ const QRGenerator = () => {
 
   const generateQR = () => {
     if (!text.trim()) {
-      alert('Please enter some text to generate QR code');
+      toast('Please enter some text to generate QR code');
       return;
     }
 

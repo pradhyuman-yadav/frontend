@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '../../components/Toast';
 
 const CodeFormatter = () => {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ const CodeFormatter = () => {
 
   const formatCode = () => {
     if (!inputCode.trim()) {
-      alert('Please enter some code to format');
+      toast('Please enter some code to format');
       return;
     }
 
@@ -88,7 +89,7 @@ const CodeFormatter = () => {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(formattedCode);
-    alert('Formatted code copied to clipboard!');
+    toast('Formatted code copied to clipboard!');
   };
 
   const clearAll = () => {

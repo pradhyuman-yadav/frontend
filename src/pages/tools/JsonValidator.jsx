@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '../../components/Toast';
 
 const JsonValidator = () => {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ const JsonValidator = () => {
 
   const validateJson = () => {
     if (!jsonInput.trim()) {
-      alert('Please enter JSON data to validate');
+      toast('Please enter JSON data to validate');
       return;
     }
 
@@ -33,21 +34,21 @@ const JsonValidator = () => {
 
   const minifyJson = () => {
     if (!jsonInput.trim()) {
-      alert('Please enter JSON data first');
+      toast('Please enter JSON data first');
       return;
     }
 
     try {
       const parsed = JSON.parse(jsonInput);
       setFormattedJson(JSON.stringify(parsed));
-    } catch (error) {
-      alert('Please fix JSON errors before minifying');
+    } catch {
+      toast('Please fix JSON errors before minifying');
     }
   };
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(formattedJson);
-    alert('JSON copied to clipboard!');
+    toast('JSON copied to clipboard!');
   };
 
   const clearAll = () => {

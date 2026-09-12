@@ -1,48 +1,66 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import Navigation from './Navigation';
 import DarkModeToggle from './DarkModeToggle';
+import Footer from './Footer';
+import { Toaster } from './Toast';
 
 const Layout = ({ children }) => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { pathname } = useLocation();
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+  // Close the mobile sheet on navigation.
+  useEffect(() => setIsMenuOpen(false), [pathname]);
 
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
+  // Close on Escape so the sheet is dismissible from the keyboard.
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const onKeyDown = (e) => e.key === 'Escape' && setIsMenuOpen(false);
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isMenuOpen]);
 
   return (
     <div className="layout">
-      {/* Hamburger Menu Button - Mobile Only */}
-      <button
-        className={`hamburger-menu ${isMobileMenuOpen ? 'active' : ''}`}
-        onClick={toggleMobileMenu}
-        aria-label="Toggle navigation menu"
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <a className="skip-link" href="#main">
+        Skip to content
+      </a>
 
-      {/* Left sidebar - Navigation */}
-      <div className={`nav-sidebar ${isMobileMenuOpen ? 'active' : ''}`}>
-        <Navigation />
-        <DarkModeToggle />
-      </div>
+      <header className="site-nav">
+        <div className="site-nav-inner">
+          <Link to="/" className="nav-brand">
+            Pradhyuman Yadav
+          </Link>
 
-      {/* Center - Main page content */}
-      <div className="page-container">
-        <main className="main-content" onClick={closeMobileMenu}>
-          {children}
-        </main>
-      </div>
+          <div className={`nav-sheet ${isMenuOpen ? 'active' : ''}`} id="nav-sheet">
+            <Navigation onNavigate={() => setIsMenuOpen(false)} />
+          </div>
 
-      {/* Right sidebar - Name branding */}
-      <div className="name-branding">
-        <h1 className="site-title-vertical">Pradhyuman Yadav</h1>
-      </div>
+          <div className="nav-actions">
+            <DarkModeToggle />
+          </div>
+
+          <button
+            type="button"
+            className={`hamburger-menu ${isMenuOpen ? 'active' : ''}`}
+            onClick={() => setIsMenuOpen((open) => !open)}
+            aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMenuOpen}
+            aria-controls="nav-sheet"
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
+      </header>
+
+      <main className="main-content" id="main">
+        {children}
+      </main>
+
+      <Footer />
+      <Toaster />
     </div>
   );
 };

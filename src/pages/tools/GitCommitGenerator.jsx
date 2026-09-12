@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '../../components/Toast';
 
 const GitCommitGenerator = () => {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ const GitCommitGenerator = () => {
 
   const generateCommitMessage = async () => {
     if (!changes.trim()) {
-      alert('Please describe your changes first');
+      toast('Please describe your changes first');
       return;
     }
 
@@ -28,7 +29,7 @@ const GitCommitGenerator = () => {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(commitMessage);
-    alert('Commit message copied to clipboard!');
+    toast('Commit message copied to clipboard!');
   };
 
   const clearAll = () => {

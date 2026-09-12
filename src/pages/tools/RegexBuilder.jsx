@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '../../components/Toast';
+import { readStored } from '../../utils/storage';
 
 const RegexBuilder = () => {
   const navigate = useNavigate();
@@ -13,7 +15,7 @@ const RegexBuilder = () => {
   const [replacedString, setReplacedString] = useState('');
   const [activeTab, setActiveTab] = useState('tester');
   const [savedRegex, setSavedRegex] = useState(
-    JSON.parse(localStorage.getItem('savedRegex')) || []
+    readStored('savedRegex')
   );
 
   const testRegex = () => {
@@ -40,6 +42,11 @@ const RegexBuilder = () => {
             index: matchResult.index,
             groups: matchResult.slice(1)
           });
+          // A pattern that can match the empty string (a*, \b, ^) never advances
+          // lastIndex on its own, which would spin this loop forever.
+          if (matchResult.index === regex.lastIndex) {
+            regex.lastIndex += 1;
+          }
         }
       } else {
         match = testString.match(regex);
@@ -126,7 +133,7 @@ const RegexBuilder = () => {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    alert('Copied to clipboard!');
+    toast('Copied to clipboard!');
   };
 
   const examples = [

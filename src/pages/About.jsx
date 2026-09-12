@@ -23,7 +23,10 @@ const About = () => {
             <div className="initials-avatar">PY</div>
           )}
           <div className="profile-info">
-            {about.currentRole && <h3 className="current-role">{about.currentRole}</h3>}
+            {/* The page's only h1. Without it the heading order started at h3. */}
+            <h1 className="profile-name">{about.name}</h1>
+            {about.currentRole && <p className="current-role">{about.currentRole}</p>}
+            {about.tagline && <p className="profile-bio">{about.tagline}</p>}
             <div className="profile-contacts">
               {about.location && <span className="profile-contact">{about.location}</span>}
               {about.phone && (
@@ -50,9 +53,6 @@ const About = () => {
           </div>
         </div>
 
-        {about.tagline && (
-          <p className="tagline-rule">{about.tagline}</p>
-        )}
       </header>
 
       {about.bio && (

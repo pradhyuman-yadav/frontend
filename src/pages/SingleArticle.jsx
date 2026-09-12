@@ -37,10 +37,18 @@ const SingleArticle = () => {
   }, [id]);
 
   const BackBtn = () => (
-    <button className="back-btn" onClick={() => navigate('/articles')}>
-      ← Back to Articles
+    <button type="button" className="back-btn" onClick={() => navigate('/articles')}>
+      ← Back to Writing
     </button>
   );
+
+  // CMS dates are not guaranteed parseable; an invalid one must not take the
+  // page down via toISOString().
+  const publishedAt = article?.publishDate ? new Date(article.publishDate) : null;
+  const publishedValid = publishedAt && !Number.isNaN(publishedAt.getTime());
+  const updatedAt = article?.lastModified ? new Date(article.lastModified) : null;
+  const updatedValid = updatedAt && !Number.isNaN(updatedAt.getTime());
+  const dateFormat = { year: 'numeric', month: 'long', day: 'numeric' };
 
   if (loading) {
     return (
@@ -76,27 +84,33 @@ const SingleArticle = () => {
       <article className="article-display">
         {article.featuredImage && (
           <figure className="article-featured-image">
-            <img src={article.featuredImage} alt={article.title} />
+            <img
+              src={article.featuredImage}
+              alt={article.title}
+              width="1200"
+              height="630"
+              fetchPriority="high"
+            />
           </figure>
         )}
 
-        <header style={{ borderTop: 'var(--rule-thick) solid var(--ink)', paddingTop: '.75rem', marginBottom: '1.5rem' }}>
+        <header>
           <h1 className="art-title">{article.title}</h1>
           <div className="art-meta">
-            {article.author && <span>By {article.author}</span>}
-            {article.publishDate && (
-              <time dateTime={new Date(article.publishDate).toISOString()}>
-                {new Date(article.publishDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            {article.author && <span>{article.author}</span>}
+            {publishedValid && (
+              <time dateTime={publishedAt.toISOString()}>
+                {publishedAt.toLocaleDateString(undefined, dateFormat)}
               </time>
             )}
-            {article.readingTime && <span>{article.readingTime} min read</span>}
+            {article.readingTime > 0 && <span>{article.readingTime} min read</span>}
           </div>
           {article.excerpt && <p className="art-excerpt">{article.excerpt}</p>}
         </header>
 
         <div className="art-body article-content" dangerouslySetInnerHTML={{ __html: article.content }} />
 
-        <footer style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+        <footer className="article-footer">
           {article.tags && article.tags.length > 0 && (
             <div className="article-card-tags">
               {article.tags.map((tag, i) => (
@@ -104,9 +118,9 @@ const SingleArticle = () => {
               ))}
             </div>
           )}
-          {article.lastModified && (
-            <p style={{ marginTop: '.75rem', fontSize: '.78rem', fontStyle: 'italic', opacity: '.65' }}>
-              Last updated: {new Date(article.lastModified).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          {updatedValid && (
+            <p className="article-updated">
+              Last updated {updatedAt.toLocaleDateString(undefined, dateFormat)}
             </p>
           )}
         </footer>

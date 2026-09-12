@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '../../components/Toast';
+import { readStored } from '../../utils/storage';
 
 const APITester = () => {
   const navigate = useNavigate();
@@ -16,7 +18,7 @@ const APITester = () => {
   const [activeTab, setActiveTab] = useState('headers');
   const [responseTab, setResponseTab] = useState('body');
   const [savedRequests, setSavedRequests] = useState(
-    JSON.parse(localStorage.getItem('apiRequests')) || []
+    readStored('apiRequests')
   );
 
   const addHeaderRow = () => {
@@ -94,7 +96,7 @@ const APITester = () => {
       if (['POST', 'PUT', 'PATCH'].includes(method) && body.trim()) {
         try {
           requestOptions.body = body;
-        } catch (e) {
+        } catch {
           setError('Invalid request body');
           setLoading(false);
           return;
@@ -158,7 +160,7 @@ const APITester = () => {
     const updated = [request, ...savedRequests];
     setSavedRequests(updated);
     localStorage.setItem('apiRequests', JSON.stringify(updated));
-    alert('Request saved successfully!');
+    toast('Request saved successfully!');
   };
 
   const loadRequest = (req) => {
@@ -177,7 +179,7 @@ const APITester = () => {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    alert('Copied to clipboard!');
+    toast('Copied to clipboard!');
   };
 
   const getStatusColor = (code) => {
