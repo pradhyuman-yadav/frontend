@@ -4,35 +4,18 @@ import InfrastructureSVG from '../components/InfrastructureSVG';
 import { fetchSquidexArticles } from '../services/cmsService';
 import { processArticleData } from '../utils/richTextConverter';
 import { useReveal } from '../hooks/useReveal';
-
-// The three project pages, surfaced here instead of crowding the top nav.
-const PROJECTS = [
-  {
-    to: '/llm-chat',
-    title: 'Self-hosted AI Chat',
-    description:
-      'A chat interface running against open-source models on my own hardware, with streaming responses and model switching.',
-    tags: ['Ollama', 'Streaming', 'FastAPI'],
-  },
-  {
-    to: '/pipeline',
-    title: 'Infrastructure Pipeline',
-    description: 'The services behind this site, and how traffic moves between them.',
-    tags: ['Docker', 'Portainer'],
-  },
-  {
-    to: '/dc-metro',
-    title: 'DC Metro Board',
-    description: 'Live arrivals for the Washington DC Metro, built as a standalone app.',
-    tags: ['WMATA API', 'React'],
-  },
-];
+import { NOW, FEATURED_PROJECTS, CATEGORIES, PROJECTS } from '../data/work';
 
 const formatDate = (value) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 };
+
+// Oldest project year, so the range statement stays true as the list grows.
+const FIRST_YEAR = PROJECTS.map((p) => Number(p.startDate.slice(-4)))
+  .filter(Boolean)
+  .sort()[0];
 
 const Home = () => {
   const [articles, setArticles] = useState([]);
@@ -48,8 +31,6 @@ const Home = () => {
         setArticles(items.slice(0, 4).map(processArticleData));
       })
       .catch(() => {
-        // The home page still works without the CMS; the writing section
-        // simply renders its empty state.
         if (!cancelled) setArticles([]);
       })
       .finally(() => {
@@ -64,75 +45,94 @@ const Home = () => {
   return (
     <div className="home-page" ref={revealRef}>
       {/* Hero — headline, lede, two CTAs. Nothing else. */}
-      <section className="hero">
-        <div>
-          <h1 className="hero-title">
-            I build for the web, and <em>write</em> about it.
-          </h1>
-          <p className="hero-lede">
-            Engineer working across infrastructure, front-end, and everything that keeps a
-            self-hosted platform running.
-          </p>
-          <div className="hero-actions">
-            <Link className="btn btn-primary btn-lg" to="/articles">
-              Read the Writing
-            </Link>
-            <Link className="btn btn-lg" to="/about">
-              About Me
-            </Link>
-          </div>
-        </div>
-
-        <div className="hero-aside">
-          {/* A zero-count stat reads as broken, so the posts tile only appears
-              once there is something to count. */}
-          {articles.length > 0 && (
-            <div className="hero-stat">
-              <span className="hero-stat-value">{articles.length}</span>
-              <span className="hero-stat-label">Recent posts</span>
-            </div>
-          )}
-          <div className="hero-stat">
-            <span className="hero-stat-value">11</span>
-            <span className="hero-stat-label">Tools built</span>
-          </div>
-          <div className="hero-stat">
-            <span className="hero-stat-value">8</span>
-            <span className="hero-stat-label">Services hosted</span>
-          </div>
+      <section className="hero hero-solo">
+        <h1 className="hero-title">
+          I build things, run them myself, and <em>write</em> about what breaks.
+        </h1>
+        <p className="hero-lede">
+          Engineer working across infrastructure, machine learning, and the front end. I have
+          been shipping projects since {FIRST_YEAR} and hosting all of it on my own hardware.
+        </p>
+        <div className="hero-actions">
+          <Link className="btn btn-primary btn-lg" to="/tools">
+            See the Work
+          </Link>
+          <Link className="btn btn-lg" to="/about">
+            About Me
+          </Link>
         </div>
       </section>
 
-      {/* Selected work — bento, exactly three cells for three projects. */}
+      {/* Now — present tense. */}
       <section className="reveal">
         <div className="section-head">
-          <h2 className="section-title">Selected work</h2>
-          <Link className="section-link" to="/tools">
-            All tools →
+          <h2 className="section-title">What I am doing now</h2>
+          <Link className="section-link" to="/pipeline">
+            The stack →
           </Link>
         </div>
 
-        <div className="work-grid">
-          {PROJECTS.map((project) => (
-            <Link key={project.to} to={project.to} className="work-card">
-              <h3 className="work-card-title">{project.title}</h3>
-              <p className="work-card-desc">{project.description}</p>
-              <div className="work-card-tags">
-                {project.tags.map((tag) => (
-                  <span key={tag} className="tag">
-                    {tag}
-                  </span>
-                ))}
-              </div>
+        <div className="now-list">
+          {NOW.map((item) => (
+            <Link key={item.to} to={item.to} className="now-row">
+              <h3 className="now-row-title">{item.title}</h3>
+              <p className="now-row-desc">{item.description}</p>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Writing — rows, a different layout family from the grid above. */}
+      {/* Built — past tense, the range. Bento: 4 cells for 4 projects. */}
       <section className="reveal">
         <div className="section-head">
-          <h2 className="section-title">Recent writing</h2>
+          <h2 className="section-title">What I have built</h2>
+          <Link className="section-link" to="/tools">
+            All {PROJECTS.length} projects →
+          </Link>
+        </div>
+
+        <p className="section-lede">
+          {PROJECTS.length} projects across {CATEGORIES.length} fields — a motion-capture suit
+          wired from sensors up, computer vision and deep-learning models, a trading pipeline, and
+          a good deal of the web in between.
+        </p>
+
+        <div className="work-grid">
+          {FEATURED_PROJECTS.map((project) => (
+            <article key={project.id} className="work-card work-card-static">
+              <div className="work-card-head">
+                <h3 className="work-card-title">{project.name}</h3>
+                <span className="work-card-year">
+                  {project.endDate && project.endDate !== project.startDate
+                    ? `${project.startDate} – ${project.endDate}`
+                    : project.startDate}
+                </span>
+              </div>
+              <p className="work-card-desc">{project.description}</p>
+              <div className="work-card-tags">
+                {project.technologies.slice(0, 4).map((tech) => (
+                  <span key={tech} className="tag">
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <div className="field-row">
+          {CATEGORIES.map((category) => (
+            <span key={category} className="field-chip">
+              {category}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* Writing — rows, a different layout family. */}
+      <section className="reveal">
+        <div className="section-head">
+          <h2 className="section-title">Writing</h2>
           <Link className="section-link" to="/articles">
             All posts →
           </Link>
@@ -177,6 +177,29 @@ const Home = () => {
 
         <div className="infrastructure-diagram">
           <InfrastructureSVG />
+        </div>
+      </section>
+
+      {/* Next — forward looking, ends on contact. */}
+      <section className="next-panel reveal">
+        <h2 className="section-title">What is next</h2>
+        <p className="next-lede">
+          More self-hosted infrastructure, more writing about the parts that are actually hard,
+          and more small tools. If you are working on something in that territory, I would like
+          to hear about it.
+        </p>
+        <div className="hero-actions">
+          <a className="btn btn-primary" href="mailto:pradhyuman999@gmail.com">
+            Get in Touch
+          </a>
+          <a
+            className="btn"
+            href="https://github.com/pradhyuman-yadav"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GitHub
+          </a>
         </div>
       </section>
     </div>
